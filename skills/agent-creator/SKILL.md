@@ -101,7 +101,7 @@ OUTPUT: Role research sufficient to populate all 7 components.
 
 ### Step 4: Build the 7-Component Definition
 
-Follow the format specified in `schemas/agent-definition.md`. Build each component in order:
+Follow the format specified in `${CLAUDE_PLUGIN_ROOT}/schemas/agent-definition.md`. Build each component in order:
 
 #### 4a. Role Identity (~20-50 tokens)
 
@@ -238,13 +238,13 @@ OUTPUT: Delivered agent definition.
 
 ## Output Format
 
-The output is a complete agent definition markdown file following `schemas/agent-definition.md`. The file contains:
+The output is a complete agent definition markdown file following `${CLAUDE_PLUGIN_ROOT}/schemas/agent-definition.md`. The file contains:
 
 1. YAML frontmatter with library metadata
 2. Seven numbered sections (Role Identity, Domain Vocabulary, Deliverables, Decision Authority, SOP, Anti-Patterns, Interaction Model)
 3. Each section follows the format rules specified in the schema
 
-See `references/agent-template.md` for a fully annotated example.
+See `${CLAUDE_PLUGIN_ROOT}/skills/agent-creator/references/agent-template.md` for a fully annotated example.
 
 ---
 
@@ -297,7 +297,7 @@ Why it works: Three distinct clusters. Every term passes the 15-year practitione
 
 ## References
 
-- `schemas/agent-definition.md` — The 7-component format specification
-- `references/persona-science.md` — PRISM findings on persona effectiveness
-- `references/agent-template.md` — Annotated gold-standard agent example
-- `references/failure-modes.md` — MAST failure modes relevant to agent design
+- `${CLAUDE_PLUGIN_ROOT}/schemas/agent-definition.md` — The 7-component format specification
+- `${CLAUDE_PLUGIN_ROOT}/skills/agent-creator/references/persona-science.md` — PRISM findings on persona effectiveness
+- `${CLAUDE_PLUGIN_ROOT}/skills/agent-creator/references/agent-template.md` — Annotated gold-standard agent example
+- `${CLAUDE_PLUGIN_ROOT}/skills/agent-creator/references/failure-modes.md` — MAST failure modes relevant to agent design

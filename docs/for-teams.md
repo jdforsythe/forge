@@ -4,19 +4,45 @@ Forge works well for individual use, but it is designed to scale to teams. This 
 
 ## Install Forge for the Team
 
-Every team member installs Forge as a Claude Code plugin:
+Forge has two layers: the **plugin** (core skills, shipped via marketplace) and the **project** (agent definitions and customizations, committed to your repo). Both are required for a full team setup.
 
+### The Plugin Layer
+
+Each team member adds the Forge marketplace and installs the plugin once:
+
+**Claude Code:**
 ```
-/plugin add https://github.com/jdforsythe/forge
+/plugin marketplace add jdforsythe/forge
+/plugin install forge@forge
 ```
 
-This gives everyone the same core skills, agent library, and templates. For project-specific customizations, commit agent definitions and skill overrides to your repo's `.claude/` directory:
+**Cowork:** Go to Customize → Plugins → Add marketplace, paste `jdforsythe/forge`, then install Forge. Enterprise admins can push it to the whole org from Organization Settings → Plugins.
+
+### The Project Layer
+
+For Claude Code teams, commit a `.claude/settings.json` to your repo. When team members trust the project folder, Claude Code prompts them to install the marketplace and plugin automatically — no manual step needed:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "forge": {
+      "source": { "source": "github", "repo": "jdforsythe/forge" }
+    }
+  },
+  "enabledPlugins": {
+    "forge@forge": true
+  }
+}
+```
+
+Add project-specific agent definitions and skill overrides alongside it:
 
 ```
 your-repo/
   .claude/
-    agents/       # Project-specific agent definitions
-    skills/       # Skill overrides for this project
+    settings.json  # Forge marketplace + plugin (auto-installs for team members)
+    agents/        # Project-specific agent definitions
+    skills/        # Skill overrides for this project
 ```
 
 Project-level files take precedence over the plugin, so the team gets shared defaults plus project-specific customizations.
@@ -57,18 +83,16 @@ Store custom templates in your project's `.claude/templates/` directory and comm
 
 ## Onboarding New Team Members
 
-New team members benefit immediately from Forge:
+New team members get up to speed in two steps:
 
-1. They clone the repo and get all agent definitions and skills automatically
-2. They run Mission Planner to understand existing project structure
-3. Pre-configured templates give them a working setup for common tasks
-4. Agent definitions encode team standards they would otherwise need to learn gradually
+1. **Install Forge once** — add the marketplace and install the plugin (Claude Code: `/plugin marketplace add jdforsythe/forge` + `/plugin install forge@forge`; Cowork: via the Customize → Plugins UI). If your repo has `.claude/settings.json` with `extraKnownMarketplaces`, Claude Code handles this automatically when they trust the project folder.
+2. **Clone the repo** — project-specific agent definitions in `.claude/agents/` activate automatically. Pre-configured templates give them a working setup for common tasks.
 
-This reduces onboarding time from days to hours for AI-assisted workflows.
+Agent definitions encode team standards they would otherwise need to learn gradually. This reduces onboarding time from days to hours for AI-assisted workflows.
 
 ## Best Practices
 
-- **Pin versions**: Use specific commits or tags for critical agent definitions rather than always pulling latest
+- **Pin versions**: Project agent definitions are already pinned by git history — no action needed. For the Forge plugin itself, pin the version by adding a `sha` to the marketplace source in `.claude/settings.json` and upgrade together as a team by updating it in a PR
 - **Document custom agents**: Add a comment at the top of each agent definition explaining why your team created it
 - **Review agent changes**: Include agent definition changes in your normal code review process
 - **Start small**: Begin with 1-2 shared agents and expand based on actual need
