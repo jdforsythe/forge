@@ -1,5 +1,7 @@
 {
   "name": "forge",
   "description": "Science-backed AI team assembly. From goal to agents to artifacts. Includes Mission Planner, Agent Creator, Skill Creator, and Librarian skills plus a starter library of 11 domain agents and 3 team templates.",
-  "version": "1.0.0"
+  "author": {
+    "name": "jdforsythe"
+  }
 }

@@ -10,25 +10,25 @@ This guide covers how to contribute, what standards we hold, and how the review 
 
 ### Adding a Team Template
 
-Team templates live in `library/templates/`. Each template is a Markdown file that follows the blueprint format defined in [`schemas/team-blueprint.md`](schemas/team-blueprint.md).
+Team templates live in `plugins/forge/library/templates/`. Each template is a Markdown file that follows the blueprint format defined in [`plugins/forge/schemas/team-blueprint.md`](plugins/forge/schemas/team-blueprint.md).
 
-1. Create a new `.md` file in `library/templates/` with a descriptive kebab-case name (e.g., `saas-mvp-launch.md`).
+1. Create a new `.md` file in `plugins/forge/library/templates/` with a descriptive kebab-case name (e.g., `saas-mvp-launch.md`).
 2. Include the required YAML frontmatter (`goal`, `domain`, `complexity`, `topology`, `agent_count`, `estimated_cost_tier`).
 3. Include all body sections: Roles, Artifact Chain, Quality Gates, Topology Rationale, and Anti-Patterns to Guard Against.
 4. Add **3 realistic test prompts** that demonstrate when this template should be selected.
 
 ### Adding Agent Definitions
 
-Agent definitions live in `library/agents/{domain}/`, organized by domain (e.g., `software`, `marketing`, `security`, `operations`, `design`).
+Agent definitions live in `plugins/forge/library/agents/{domain}/`, organized by domain (e.g., `software`, `marketing`, `security`, `operations`, `design`).
 
-1. Create a new `.md` file named to match the agent's `name` field (e.g., `library/agents/software/backend-engineer.md`).
-2. Follow the 7-component format specified in [`schemas/agent-definition.md`](schemas/agent-definition.md).
+1. Create a new `.md` file named to match the agent's `name` field (e.g., `plugins/forge/library/agents/software/backend-engineer.md`).
+2. Follow the 7-component format specified in [`plugins/forge/schemas/agent-definition.md`](plugins/forge/schemas/agent-definition.md).
 3. Include YAML frontmatter with all required fields.
 4. Add **3 realistic test prompts** that exercise the agent's core capabilities.
 
 ### Submitting New Skills
 
-Skills live in `library/skills/` (or `skills/`). Each skill is defined in a `SKILL.md` file that meets the quality gates described below.
+Skills live in `plugins/forge/skills/`. Each skill is defined in a `SKILL.md` file that meets the quality gates described below.
 
 1. Create a directory for your skill with a clear name.
 2. Write a `SKILL.md` that passes all quality gates (see Quality Standards).
@@ -52,7 +52,7 @@ Every contribution must meet the standards below. PRs that don't meet these will
 
 ### Agent Definitions
 
-Agent definitions must follow the 7-component format in [`schemas/agent-definition.md`](schemas/agent-definition.md):
+Agent definitions must follow the 7-component format in [`plugins/forge/schemas/agent-definition.md`](plugins/forge/schemas/agent-definition.md):
 
 1. **YAML Frontmatter** — All required fields (`name`, `domain`, `tags`, `created`, `quality`, `source`).
 2. **Role Identity** — 20-50 tokens. Real job title. No flattery words ("world-class," "expert").
@@ -80,7 +80,7 @@ Skills must meet these quality gates:
 
 ### Team Templates
 
-Team templates must follow [`schemas/team-blueprint.md`](schemas/team-blueprint.md), including:
+Team templates must follow [`plugins/forge/schemas/team-blueprint.md`](plugins/forge/schemas/team-blueprint.md), including:
 
 - YAML frontmatter with all required fields
 - Roles with project-specific descriptions (not generic)
