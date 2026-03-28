@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Forge Usage Log Entry",
+  "description": "Schema for individual entries in library/usage-log.jsonl. Each line in the file is one JSON object matching this schema.",
+  "type": "object",
+  "required": ["ts", "item", "type", "action", "context"],
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of the event"
+    },
+    "item": {
+      "type": "string",
+      "description": "Relative path from library/ to the item, without file extension. Example: agents/software/product-manager"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["agent", "skill", "template"],
+      "description": "What kind of library item was used"
+    },
+    "action": {
+      "type": "string",
+      "enum": ["loaded", "created", "modified", "archived", "promoted"],
+      "description": "What happened to the item"
+    },
+    "context": {
+      "type": "string",
+      "description": "Which skill or process triggered this event. Example: mission-planner, agent-creator, librarian, manual"
+    }
+  }
+}

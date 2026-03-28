@@ -1,71 +1,98 @@
-# agent-design
+# Forge
 
-A meta-skill library for building high-quality Claude Code skills and agents, grounded in transformer research and Anthropic's prompt engineering documentation.
+Science-backed AI team assembly. From goal to agents to artifacts.
 
-## What's here
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-| Skill | Purpose |
-|---|---|
-| `create-skill` | Creates a production-quality Claude Code skill from a domain description |
+Forge is an open-source system that uses research from DeepMind, PRISM persona science, and context engineering to assemble AI agent teams. It takes a goal, determines whether you need one agent or a team, selects the right coordination topology, and produces structured agent definitions with expert vocabulary, clear deliverables, and anti-pattern guardrails. Works with Claude Code and Cowork.
 
-## Why this approach
+## The Core Insight
 
-Generic skills produce generic output. This library applies research-backed techniques — expert vocabulary payloads that route attention into the right knowledge clusters, named anti-pattern watchlists that push output away from the statistical average, and structured instructions that respect the transformer's U-shaped attention curve — so that skills built here consistently hit an expert-level bar.
+The single highest-leverage intervention in AI agent quality is **vocabulary routing** — using precise domain terminology that activates expert knowledge clusters in the model's embedding space. Real-world job titles and role structures activate relevant training data better than custom personas. And DeepMind's scaling research shows that more agents isn't always better — teams of 3-5 with structured artifact handoffs outperform larger groups.
 
-The practices are derived from peer-reviewed research (Liu et al. 2024 on positional bias, Wei et al. 2022 on chain-of-thought, Vaswani et al. 2017) and Anthropic's own engineering documentation. The full synthesis is in `docs/skill-design-research-synthesis.md`.
-
-## Skills
-
-### `create-skill`
-
-Creates a complete, deployable Claude Code skill from scratch. Given a domain description, it:
-
-- Assembles an expert vocabulary payload for the target domain
-- Writes behavioral instructions with a named anti-pattern watchlist
-- Produces BAD/GOOD example pairs as few-shot demonstrations
-- Generates a dual-register description (formal + colloquial) for reliable triggering
-- Outputs a ready-to-deploy directory with `SKILL.md` and reference files
-
-**Invoke:** `/create-skill` or describe what you want Claude to be better at
-
-**Output:** A `.claude/skills/<name>/` directory with `SKILL.md` and a `references/` subdirectory for extended material
-
-The skill itself is the canonical example of what it produces — read `.claude/skills/create-skill/SKILL.md` to see the pattern applied to skill creation.
-
-## Roadmap
-
-- `create-agent` — Skill for designing high-quality Claude Code agents with tool selection, memory architecture, loop design, and evaluation criteria
-
-## Project structure
+## Quick Start: Claude Code
 
 ```
-agent-design/
-├── .claude/
-│   └── skills/
-│       └── create-skill/
-│           ├── SKILL.md                    # Core meta-skill definition
-│           └── references/
-│               ├── skill-architecture-spec.md    # File structure, section ordering, line budgets
-│               ├── anti-pattern-catalog.md       # Named failure modes with DNERP resolution
-│               ├── description-authoring.md      # Triggering surface design rules
-│               ├── vocabulary-engineering.md     # Domain terminology methodology
-│               ├── example-library.md            # BAD/GOOD pair templates
-│               ├── science-foundations.md        # Deep research explanations
-│               └── evaluation-checklist.md       # Pre-deployment verification checklist
-└── docs/
-    └── skill-design-research-synthesis.md   # 42KB research synthesis with citations
+# Install as a plugin (recommended):
+/plugin add https://github.com/jdforsythe/forge
+
+# Or via Vercel's cross-agent installer:
+npx add-skill jdforsythe/forge
+
+# Then just describe what you want:
+"Build me a SaaS analytics product"  # Mission Planner activates
+"Create an agent for code review"     # Agent Creator activates
 ```
 
-## Research foundation
+## Quick Start: Cowork
 
-`docs/skill-design-research-synthesis.md` covers:
+1. Install Forge as a plugin or copy `skills/` into your Cowork skills directory.
+2. Start a conversation: *"I need to plan a marketing campaign"*
 
-- How transformers allocate attention and why position matters
-- Vocabulary as routing signals in embedding space
-- Why negative constraints produce better output than positive-only instructions
-- Few-shot examples vs verbose instructions (when each works)
-- Structural clarity: XML tags vs Markdown
-- Progressive disclosure architecture for large skill payloads
-- A 40-item pre-deployment evaluation checklist
+## What's Included
 
-Primary sources include Liu et al. (2024), Wei et al. (2022), Vaswani et al. (2017), and nine Anthropic engineering documents.
+```
+forge/
+├── skills/          4 core skills
+│   ├── mission-planner/   Decomposes goals into team blueprints
+│   ├── agent-creator/     Builds individual agent definitions
+│   ├── skill-creator/     Creates reusable skill packages
+│   └── librarian/         Manages the agent/template library
+│
+├── agents/          3 infrastructure agents
+│   ├── verifier.md        Validates outputs against schemas
+│   ├── researcher.md      Gathers context and source material
+│   └── reviewer.md        Reviews and critiques agent definitions
+│
+├── library/         Starter collection
+│   └── index.json         11 domain agents, 3 team templates
+│       ├── software/      Product Manager, Architect, Lead Engineer, QA
+│       ├── marketing/     Campaign Strategist, Content Creator, Designer, Analytics Lead
+│       └── security/      Lead Auditor, Penetration Tester, Compliance Analyst
+│
+├── schemas/         Format specifications
+│   ├── agent-definition.md    7-component agent structure
+│   ├── team-blueprint.md      Blueprint format for coordinated teams
+│   ├── index-schema.json      Library index format
+│   └── usage-log-schema.json  Usage tracking format
+│
+├── research/        Scientific foundation (8 reference documents)
+│   ├── scaling-laws.md        DeepMind multi-agent scaling findings
+│   ├── vocabulary-routing.md  Domain terminology activation patterns
+│   ├── persona-science.md     PRISM persona research
+│   ├── team-design.md         Topology selection and team structure
+│   ├── context-engineering.md Context window optimization
+│   ├── failure-taxonomy.md    Common failure modes and mitigations
+│   ├── master-synthesis.md    Unified framework across all research
+│   └── source-index.md        Full bibliography
+│
+├── docs/            User documentation
+└── schemas/         Format specifications
+```
+
+## How It Works
+
+Forge uses a 3-level decision flow:
+
+**Level 0 — Single Agent.** The goal is simple enough for one agent. Forge produces a single well-prompted agent definition with the right vocabulary, deliverables, and guardrails. No coordination overhead.
+
+**Level 1 — Known Pattern.** The goal matches a template in the library (e.g., SaaS product, marketing campaign, security audit). Forge loads the template, adapts roles to your specific goal, and creates the full agent team with artifact handoff chains.
+
+**Level 2 — Novel Domain.** No template exists. Forge decomposes the goal into workstreams, proposes a team topology (pipeline, parallel, coordinator, or hierarchical), defines roles with precise vocabulary, and iterates with you until the blueprint is right.
+
+At every level, the same principles apply: real-world role titles, domain-specific vocabulary, structured artifacts between agents, and a hard cap of 3-5 agents per team.
+
+## Research Foundation
+
+Every design decision in Forge traces back to published research. The `research/` directory contains synthesized findings from DeepMind's multi-agent scaling laws, PRISM persona science, and context engineering best practices.
+
+For the full methodology, see [METHODOLOGY.md](METHODOLOGY.md).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding agents, templates, skills, and research.
+
+## License
+
+[MIT](LICENSE)

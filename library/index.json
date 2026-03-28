@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "updated": "2026-03-28T00:00:00Z",
+  "agents": [
+    {
+      "name": "product-manager",
+      "domain": "software",
+      "path": "agents/software/product-manager.md",
+      "tags": ["product-management", "requirements", "PRD", "user-personas", "prioritization", "saas", "b2b", "stakeholder-management"],
+      "quality": "curated"
+    },
+    {
+      "name": "software-architect",
+      "domain": "software",
+      "path": "agents/software/software-architect.md",
+      "tags": ["architecture", "design", "systems", "technical-decisions", "ADR", "saas", "api-design", "domain-driven-design"],
+      "quality": "curated"
+    },
+    {
+      "name": "lead-engineer",
+      "domain": "software",
+      "path": "agents/software/lead-engineer.md",
+      "tags": ["engineering", "implementation", "code-review", "ci-cd", "deployment", "technical-debt", "testing", "saas"],
+      "quality": "curated"
+    },
+    {
+      "name": "qa-engineer",
+      "domain": "software",
+      "path": "agents/software/qa-engineer.md",
+      "tags": ["quality-assurance", "testing", "test-automation", "defect-tracking", "regression", "accessibility", "performance-testing", "saas"],
+      "quality": "curated"
+    },
+    {
+      "name": "campaign-strategist",
+      "domain": "marketing",
+      "path": "agents/marketing/campaign-strategist.md",
+      "tags": ["marketing", "campaign", "strategy", "audience-segmentation", "channel-planning", "go-to-market"],
+      "quality": "curated"
+    },
+    {
+      "name": "content-creator",
+      "domain": "marketing",
+      "path": "agents/marketing/content-creator.md",
+      "tags": ["marketing", "content", "copywriting", "SEO", "email", "social-media", "editorial"],
+      "quality": "curated"
+    },
+    {
+      "name": "designer",
+      "domain": "marketing",
+      "path": "agents/marketing/designer.md",
+      "tags": ["marketing", "design", "visual-assets", "brand-guidelines", "typography", "layout"],
+      "quality": "curated"
+    },
+    {
+      "name": "analytics-lead",
+      "domain": "marketing",
+      "path": "agents/marketing/analytics-lead.md",
+      "tags": ["marketing", "analytics", "KPI", "attribution", "conversion", "A/B-testing", "ROI"],
+      "quality": "curated"
+    },
+    {
+      "name": "lead-auditor",
+      "domain": "security",
+      "path": "agents/security/lead-auditor.md",
+      "tags": ["security", "audit", "threat-modeling", "STRIDE", "risk-assessment", "remediation"],
+      "quality": "curated"
+    },
+    {
+      "name": "penetration-tester",
+      "domain": "security",
+      "path": "agents/security/penetration-tester.md",
+      "tags": ["security", "penetration-testing", "OWASP", "vulnerability", "exploit", "reconnaissance"],
+      "quality": "curated"
+    },
+    {
+      "name": "compliance-analyst",
+      "domain": "security",
+      "path": "agents/security/compliance-analyst.md",
+      "tags": ["security", "compliance", "SOC2", "ISO-27001", "GDPR", "HIPAA", "PCI-DSS"],
+      "quality": "curated"
+    }
+  ],
+  "skills": [],
+  "templates": [
+    {
+      "name": "saas-product-team",
+      "domain": "software",
+      "path": "templates/saas-product-team.md",
+      "roles": ["product-manager", "software-architect", "lead-engineer", "qa-engineer"]
+    },
+    {
+      "name": "marketing-campaign",
+      "domain": "marketing",
+      "path": "templates/marketing-campaign.md",
+      "roles": ["campaign-strategist", "content-creator", "designer", "analytics-lead"]
+    },
+    {
+      "name": "security-audit",
+      "domain": "security",
+      "path": "templates/security-audit.md",
+      "roles": ["lead-auditor", "penetration-tester", "compliance-analyst"]
+    }
+  ]
+}
