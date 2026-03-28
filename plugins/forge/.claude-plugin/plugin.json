@@ -1,0 +1,18 @@
+{
+  "name": "forge",
+  "version": "1.0.0",
+  "description": "Mission Planner, Agent Creator, Skill Creator, and Librarian — the complete Forge suite for science-backed AI team assembly",
+  "author": {
+    "name": "jdforsythe",
+    "url": "https://github.com/jdforsythe"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ai-powered",
+    "skills",
+    "agents",
+    "multi-agent",
+    "single-agent",
+    "meta"
+  ]
+}
