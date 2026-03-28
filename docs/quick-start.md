@@ -6,36 +6,41 @@ Get from zero to a working agent team in under five minutes.
 
 ## Installation
 
-### Claude Code
+### Claude Code (Plugin — Recommended)
 
-**Global install** (available in every project):
+Install Forge as a Claude Code plugin:
 
-```bash
-git clone https://github.com/jdforsythe/meta-skill.git ~/.claude/forge
+```
+/plugin add https://github.com/jdforsythe/forge
 ```
 
-**Project-level install** (scoped to one repo):
+This registers Forge's skills globally. Claude Code discovers the `skills/` directory at the plugin root and makes all four core skills available in every project.
+
+**Alternative: Vercel's cross-agent installer:**
 
 ```bash
-cd your-project/
-git clone https://github.com/jdforsythe/meta-skill.git .claude/forge
+npx add-skill jdforsythe/forge
 ```
 
-Skills auto-discover from both locations. Claude Code scans `~/.claude/forge/skills/` and `.claude/forge/skills/` on startup, so no additional configuration is needed. If both exist, project-level definitions take precedence.
+This detects your installed AI coding agents and copies skills into the correct locations automatically.
+
+**Alternative: Manual install** (if you prefer direct filesystem control):
+
+```bash
+git clone https://github.com/jdforsythe/forge.git
+# Then symlink or copy individual skills into ~/.claude/skills/
+ln -s $(pwd)/forge/skills/mission-planner ~/.claude/skills/mission-planner
+ln -s $(pwd)/forge/skills/agent-creator ~/.claude/skills/agent-creator
+ln -s $(pwd)/forge/skills/skill-creator ~/.claude/skills/skill-creator
+ln -s $(pwd)/forge/skills/librarian ~/.claude/skills/librarian
+```
 
 ### Cowork
 
-**Full install** -- copy the entire skills directory into your Cowork skills folder:
+Install Forge as a plugin or copy the skills directory into your Cowork skills folder:
 
 ```bash
-cp -r forge/skills/ ~/cowork/skills/forge/
-```
-
-**Individual skills** -- install only what you need via the Cowork plugin system:
-
-```bash
-cowork plugin install ./forge/skills/mission-planner
-cowork plugin install ./forge/skills/agent-creator
+cp -r forge/skills/ ~/cowork/skills/
 ```
 
 Agent definitions and templates from `library/` are referenced automatically once the skills are installed.

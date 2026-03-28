@@ -141,20 +141,23 @@ The Librarian produces a structured report covering: inventory summary, stalenes
 
 ## 5. Team Distribution
 
-Forge is designed to be shared via version control.
+Forge is designed to be shared across a team.
 
-**Setup:**
-1. Commit the `.claude/forge/` directory to your repository:
-   ```
-   git add .claude/forge/
-   git commit -m "Add Forge team configuration"
-   ```
-2. Every team member who clones the repo gets the same library, skills, and templates.
+**Plugin install (recommended):** Every team member installs Forge as a plugin:
+```
+/plugin add https://github.com/jdforsythe/forge
+```
+
+**Project-level customizations:** To share custom agents and templates specific to a project, commit them to your repo's `.claude/` directory:
+```
+git add .claude/agents/ .claude/skills/
+git commit -m "Add project agent definitions"
+```
 
 **Precedence rules:**
-- Project-level items (in your repo's `.claude/forge/`) override global ones (in `~/.claude/forge/`).
-- If the same agent name exists at both levels, the project-level version wins.
-- This lets you customize agents for a specific project without affecting your global library.
+- Project-level items (in your repo's `.claude/skills/`) override plugin-provided ones.
+- If the same skill name exists at both levels, the project-level version wins.
+- This lets you customize skills for a specific project without affecting the global plugin.
 
 **Sharing individual items:**
 - Copy specific agents or templates between repos by moving the `.md` files and updating each repo's `library/index.json`.
@@ -192,5 +195,5 @@ The four core skills (`mission-planner`, `agent-creator`, `skill-creator`, `libr
 | Review library health | "Review the library" |
 | Create agent via assistant | "Create a [role] agent for [domain]" |
 | Create skill via assistant | "Create a skill for [domain]" |
-| Share with team | `git add .claude/forge/ && git commit` |
+| Share with team | `/plugin add https://github.com/jdforsythe/forge` |
 | Override a core skill | Copy from `skills/` to `.claude/skills/`, edit the copy |

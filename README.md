@@ -13,25 +13,28 @@ The single highest-leverage intervention in AI agent quality is **vocabulary rou
 
 ## Quick Start: Claude Code
 
-```bash
-# 1. Clone into your Claude config
-git clone https://github.com/jdforsythe/meta-skill.git ~/.claude/forge
+```
+# Install as a plugin (recommended):
+/plugin add https://github.com/jdforsythe/forge
 
-# 2. In any project, just describe what you want:
+# Or via Vercel's cross-agent installer:
+npx add-skill jdforsythe/forge
+
+# Then just describe what you want:
 "Build me a SaaS analytics product"  # Mission Planner activates
 "Create an agent for code review"     # Agent Creator activates
 ```
 
 ## Quick Start: Cowork
 
-1. Copy `skills/` to your Cowork skills folder.
+1. Install Forge as a plugin or copy `skills/` into your Cowork skills directory.
 2. Start a conversation: *"I need to plan a marketing campaign"*
 
 ## What's Included
 
 ```
 forge/
-├── skills/          4 core meta-skills
+├── skills/          4 core skills
 │   ├── mission-planner/   Decomposes goals into team blueprints
 │   ├── agent-creator/     Builds individual agent definitions
 │   ├── skill-creator/     Creates reusable skill packages

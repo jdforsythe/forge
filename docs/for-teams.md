@@ -2,20 +2,24 @@
 
 Forge works well for individual use, but it is designed to scale to teams. This guide covers how to share agent definitions, maintain consistency, and onboard new team members.
 
-## Commit Your Forge Configuration
+## Install Forge for the Team
 
-The key to team usage is committing your `.claude/forge/` directory to your repository:
+Every team member installs Forge as a Claude Code plugin:
+
+```
+/plugin add https://github.com/jdforsythe/forge
+```
+
+This gives everyone the same core skills, agent library, and templates. For project-specific customizations, commit agent definitions and skill overrides to your repo's `.claude/` directory:
 
 ```
 your-repo/
   .claude/
-    forge/
-      agents/       # Agent definitions your team uses
-      templates/    # Team templates for common project types
-      skills/       # Installed skills
+    agents/       # Project-specific agent definitions
+    skills/       # Skill overrides for this project
 ```
 
-When you commit this directory, every team member who clones the repo gets the same agent definitions and skills. No manual setup, no configuration drift.
+Project-level files take precedence over the plugin, so the team gets shared defaults plus project-specific customizations.
 
 ## Shared Agent Definitions
 
@@ -49,7 +53,7 @@ Every team has recurring project types. Create templates for yours:
 
 Templates encode your team's best practices for structuring work. Instead of each person deciding how to set up agents for a feature, the template provides a proven starting configuration.
 
-Store custom templates in `.claude/forge/templates/` and commit them to the repo.
+Store custom templates in your project's `.claude/templates/` directory and commit them to the repo, or contribute them upstream to the Forge library.
 
 ## Onboarding New Team Members
 

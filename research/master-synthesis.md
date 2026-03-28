@@ -1,7 +1,7 @@
 # Skill & Agent Design: Research Synthesis
 ## The Science of What Works, Why It Works, and What Doesn't
 
-*Comprehensive synthesis for building a meta-skill that creates high-quality Claude Code skills and agent definitions.*
+*Comprehensive synthesis for building skills and agent definitions for Claude Code.*
 
 ---
 

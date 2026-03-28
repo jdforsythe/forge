@@ -14,7 +14,7 @@ We dug through the literature on multi-agent systems, persona assignment, contex
 
 ## What's included
 
-- 4 meta-skills: Mission Planner, Agent Creator, Skill Creator, Librarian
+- 4 core skills: Mission Planner, Agent Creator, Skill Creator, Librarian
 - 3 infrastructure agents: Verifier, Researcher, Reviewer
 - 11 domain agents across software, marketing, and security
 - 3 team templates with artifact handoff chains
@@ -23,6 +23,6 @@ We dug through the literature on multi-agent systems, persona assignment, contex
 
 The research directory contains synthesized findings from DeepMind's scaling laws, PRISM persona science, MetaGPT, MAST failure taxonomy, and context engineering literature. Every design decision traces to a citation.
 
-GitHub: [GitHub repo link]
+GitHub: [jdforsythe/forge](https://github.com/jdforsythe/forge)
 
 Full writeup: [Full article link]

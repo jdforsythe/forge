@@ -151,8 +151,13 @@ You open Claude Code or Cowork and say: *"Build me a SaaS analytics product."*
 Forge is MIT licensed. The entire system — skills, agent library, templates, research synthesis, schemas — is open and free.
 
 **Get started:**
+```
+/plugin add https://github.com/jdforsythe/forge
+```
+
+Or via Vercel's cross-agent installer:
 ```bash
-git clone https://github.com/jdforsythe/meta-skill.git ~/.claude/forge
+npx add-skill jdforsythe/forge
 ```
 
 It works with Claude Code out of the box. Point it at a goal and the Mission Planner takes it from there.
@@ -189,4 +194,4 @@ These aren't opinions. They're findings from DeepMind, PRISM, MetaGPT, and the b
 
 The research is there. The toolkit is open source. The agents are waiting to be built properly.
 
-[GitHub: jdforsythe/meta-skill](https://github.com/jdforsythe/meta-skill) | MIT License | Contributions welcome
+[GitHub: jdforsythe/forge](https://github.com/jdforsythe/forge) | MIT License | Contributions welcome

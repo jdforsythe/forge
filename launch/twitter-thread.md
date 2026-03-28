@@ -42,7 +42,7 @@ Give it a goal. It decides if you need one agent or a team, picks the topology, 
 
 **7/**
 What's included:
-- 4 meta-skills (planning, agent creation, skill creation, library management)
+- 4 core skills (planning, agent creation, skill creation, library management)
 - 11 domain agents (software, marketing, security)
 - 3 team templates with artifact handoff chains
 - 8 research docs with full citations
@@ -61,5 +61,5 @@ If you're building with AI agents, stop guessing. The research exists. The patte
 **10/**
 Forge is live and open source.
 
-GitHub: [GitHub repo link]
+GitHub: github.com/jdforsythe/forge
 Full writeup: [Full article link]
