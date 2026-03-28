@@ -8,8 +8,8 @@ An open-source system for science-backed AI team assembly.
 
 ## Conventions
 - All skill/agent files use YAML frontmatter
-- Agent definitions follow the 7-component structure (see schemas/agent-definition.md)
-- Team blueprints follow the blueprint format (see schemas/team-blueprint.md)
+- Agent definitions follow the 7-component structure (see plugins/forge/schemas/agent-definition.md)
+- Team blueprints follow the blueprint format (see plugins/forge/schemas/team-blueprint.md)
 - SKILL.md files must be <500 lines; overflow goes in references/
 - Reference files must be <300 lines with TOC if >150 lines
 - File/folder names: kebab-case

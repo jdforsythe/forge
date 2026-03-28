@@ -1,22 +1,17 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "forge",
+  "description": "Science-backed AI team assembly. Mission Planner, Agent Creator, Skill Creator, and Librarian — all four core skills in one package.",
   "owner": {
     "name": "jdforsythe"
-  },
-  "metadata": {
-    "description": "Science-backed AI team assembly. Mission Planner, Agent Creator, Skill Creator, and Librarian — all four core skills in one package."
   },
   "plugins": [
     {
       "name": "forge",
-      "source": {
-        "source": "github",
-        "repo": "jdforsythe/forge"
-      },
       "description": "Mission Planner, Agent Creator, Skill Creator, and Librarian — the complete Forge suite for science-backed AI team assembly",
-      "homepage": "https://github.com/jdforsythe/forge",
-      "license": "MIT",
-      "version": "1.0.0"
+      "source": "./plugins/forge",
+      "category": "development",
+      "homepage": "https://github.com/jdforsythe/forge"
     }
   ]
 }

@@ -6,13 +6,13 @@ How to extend the library, configure maintenance, and share your setup across a 
 
 ## 1. Adding Team Templates
 
-Team templates tell the Mission Planner how to staff a project. Every template follows the format defined in `schemas/team-blueprint.md`.
+Team templates tell the Mission Planner how to staff a project. Every template follows the format defined in `plugins/forge/schemas/team-blueprint.md`.
 
 **Steps:**
 
-1. Copy an existing template from `library/templates/` as a starting point:
+1. Copy an existing template from `plugins/forge/library/templates/` as a starting point:
    ```
-   cp library/templates/saas-product-team.md library/templates/your-template-name.md
+   cp plugins/forge/library/templates/saas-product-team.md plugins/forge/library/templates/your-template-name.md
    ```
 2. Edit the new file. Every template requires these sections:
    - **YAML frontmatter** with `goal`, `domain`, `complexity`, `topology`, `agent_count`, and `estimated_cost_tier`
@@ -21,7 +21,7 @@ Team templates tell the Mission Planner how to staff a project. Every template f
    - **Quality Gates** -- which handoffs require review before the next step proceeds
    - **Topology** -- the selected coordination architecture with rationale
    - **Anti-Patterns to Guard Against** -- team-level failure modes for this project type
-3. Register the template in `library/index.json` under the `templates` array:
+3. Register the template in `plugins/forge/library/index.json` under the `templates` array:
    ```json
    {
      "name": "your-template-name",
@@ -37,17 +37,17 @@ Team templates tell the Mission Planner how to staff a project. Every template f
 
 ## 2. Adding Domain Agents
 
-Every agent follows the 7-component format defined in `schemas/agent-definition.md`.
+Every agent follows the 7-component format defined in `plugins/forge/schemas/agent-definition.md`.
 
 **Steps:**
 
 1. Create the domain directory if it does not exist:
    ```
-   mkdir -p library/agents/your-domain
+   mkdir -p plugins/forge/library/agents/your-domain
    ```
 2. Create the agent file:
    ```
-   touch library/agents/your-domain/your-agent.md
+   touch plugins/forge/library/agents/your-domain/your-agent.md
    ```
 3. Write all seven components in order:
    - **YAML frontmatter** -- `name`, `domain`, `tags` (3-10), `created`, `quality`, `source`
@@ -59,7 +59,7 @@ Every agent follows the 7-component format defined in `schemas/agent-definition.
    - **Anti-Pattern Watchlist** -- 5-10 named failure modes with detection and resolution
    - **Interaction Model** -- receives from, delivers to, handoff format, coordination style
 4. Set `quality: untested` and `source: manual` in the frontmatter.
-5. Register in `library/index.json` under the `agents` array:
+5. Register in `plugins/forge/library/index.json` under the `agents` array:
    ```json
    {
      "name": "your-agent",
@@ -93,12 +93,12 @@ The Skill Creator handles the format automatically.
 
 ### Manual creation
 
-Follow the architecture used by existing skills (see `skills/librarian/SKILL.md` for reference).
+Follow the architecture used by existing skills (see `plugins/forge/skills/librarian/SKILL.md` for reference).
 
 1. Create the skill directory and file:
    ```
-   mkdir -p library/skills/your-skill
-   touch library/skills/your-skill/SKILL.md
+   mkdir -p plugins/forge/skills/your-skill
+   touch plugins/forge/skills/your-skill/SKILL.md
    ```
 2. Structure the file with these sections:
    - **YAML frontmatter** with `name` and `description`. The description must serve as a dual-register trigger: first paragraph explains what the skill does; second paragraph lists the natural-language phrases that should activate it; third paragraph lists what it does NOT handle.
@@ -109,15 +109,15 @@ Follow the architecture used by existing skills (see `skills/librarian/SKILL.md`
    - **Questions This Skill Answers** -- a list of representative queries the skill handles.
 3. Keep `SKILL.md` under 500 lines. If you need more reference material, place it in a `references/` subdirectory:
    ```
-   mkdir -p library/skills/your-skill/references
+   mkdir -p plugins/forge/skills/your-skill/references
    ```
-4. Register in `library/index.json` under the `skills` array.
+4. Register in `plugins/forge/library/index.json` under the `skills` array.
 
 ---
 
 ## 4. Configuring the Librarian
 
-The Librarian audits library health. Its behavior is controlled by thresholds in `skills/librarian/SKILL.md`.
+The Librarian audits library health. Its behavior is controlled by thresholds in `plugins/forge/skills/librarian/SKILL.md`.
 
 | Setting | Default | What it controls |
 |---|---|---|
@@ -128,7 +128,7 @@ The Librarian audits library health. Its behavior is controlled by thresholds in
 | Promotion: tested to iterated | 10 uses (no modifications) | Automatic quality tier advancement |
 | Hoarder threshold | 50 items, <20% active | Triggers library-wide cleanup recommendation |
 
-To adjust a threshold, edit the corresponding value in `skills/librarian/SKILL.md` directly.
+To adjust a threshold, edit the corresponding value in `plugins/forge/skills/librarian/SKILL.md` directly.
 
 **Running a manual review:**
 ```
@@ -167,15 +167,15 @@ git commit -m "Add project agent definitions"
 
 ## 6. Overriding Core Skills
 
-The four core skills (`mission-planner`, `agent-creator`, `skill-creator`, `librarian`) live in `skills/`. To customize them without losing the ability to receive upstream updates:
+The four core skills (`mission-planner`, `agent-creator`, `skill-creator`, `librarian`) live in `plugins/forge/skills/`. To customize them without losing the ability to receive upstream updates:
 
 1. Copy the skill to your project's local skills directory:
    ```
    mkdir -p .claude/skills
-   cp -r skills/librarian .claude/skills/librarian
+   cp -r plugins/forge/skills/librarian .claude/skills/librarian
    ```
 2. Edit the copy in `.claude/skills/`. Project-level skills take precedence over the originals.
-3. Do not modify the files in `skills/` directly if you want to pull future updates from the upstream Forge repository.
+3. Do not modify the files in `plugins/forge/skills/` directly if you want to pull future updates from the upstream Forge repository.
 
 **Common overrides:**
 - Adjusting the Librarian's staleness thresholds for a fast-moving project (e.g., 30 days instead of 90)
@@ -189,11 +189,11 @@ The four core skills (`mission-planner`, `agent-creator`, `skill-creator`, `libr
 
 | Task | Command or path |
 |---|---|
-| Add a template | `library/templates/your-template.md` + update `library/index.json` |
-| Add an agent | `library/agents/{domain}/your-agent.md` + update `library/index.json` |
-| Add a skill | `library/skills/your-skill/SKILL.md` + update `library/index.json` |
+| Add a template | `plugins/forge/library/templates/your-template.md` + update `plugins/forge/library/index.json` |
+| Add an agent | `plugins/forge/library/agents/{domain}/your-agent.md` + update `plugins/forge/library/index.json` |
+| Add a skill | `plugins/forge/skills/your-skill/SKILL.md` + update `plugins/forge/library/index.json` |
 | Review library health | "Review the library" |
 | Create agent via assistant | "Create a [role] agent for [domain]" |
 | Create skill via assistant | "Create a skill for [domain]" |
 | Share with team | `/plugin add https://github.com/jdforsythe/forge` |
-| Override a core skill | Copy from `skills/` to `.claude/skills/`, edit the copy |
+| Override a core skill | Copy from `plugins/forge/skills/` to `.claude/skills/`, edit the copy |
