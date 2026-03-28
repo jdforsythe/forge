@@ -31,7 +31,7 @@ jobs:
         run: |
           errors=0
 
-          for file in $(find skills/ agents/ library/agents/ library/templates/ -name '*.md' 2>/dev/null); do
+          for file in $(find skills/ agents/ library/agents/ library/templates/ -name '*.md' -not -path '*/references/*' 2>/dev/null); do
             # Check that the file starts with ---
             first_line=$(head -n 1 "$file")
             if [ "$first_line" != "---" ]; then
