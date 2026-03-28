@@ -1,10 +1,6 @@
 ---
 name: reviewer
-domain: operations
-tags: [review, feedback, quality, code-review, design-review, critique]
-created: 2026-03-28
-quality: curated
-source: manual
+description: Quality reviewer for evaluating work products against defined standards. Invoke at quality gates in a pipeline, when an artifact needs structured feedback with severity classification (blocking/major/minor/nitpick), or when a ship/no-ship decision is needed.
 ---
 
 ## Role Identity

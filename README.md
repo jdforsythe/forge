@@ -27,8 +27,9 @@ npx add-skill jdforsythe/forge
 
 ## Quick Start: Cowork
 
-1. Install Forge as a plugin or copy `skills/` into your Cowork skills directory.
-2. Start a conversation: *"I need to plan a marketing campaign"*
+**Personal:** Go to Customize → Plugins → Add marketplace, paste `jdforsythe/forge`, install Forge. Then start a conversation: *"I need to plan a marketing campaign"*
+
+**Team/Enterprise:** Admin adds `jdforsythe/forge` via Organization Settings → Plugins → Add marketplace. Team members install from the org catalog (or it auto-installs).
 
 ## What's Included
 

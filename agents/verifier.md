@@ -1,10 +1,6 @@
 ---
 name: verifier
-domain: operations
-tags: [verification, validation, quality-gate, testing, acceptance-criteria, review]
-created: 2026-03-28
-quality: curated
-source: manual
+description: Quality gate for checking outputs against explicit acceptance criteria. Invoke after an artifact is produced and before it passes downstream in a pipeline. Produces APPROVED/REJECTED verdicts with per-criterion evidence. Use for deterministic checks (schema conformance, format compliance) and criteria-based evaluation.
 ---
 
 ## Role Identity

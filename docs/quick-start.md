@@ -6,44 +6,37 @@ Get from zero to a working agent team in under five minutes.
 
 ## Installation
 
-### Claude Code (Plugin — Recommended)
+### Claude Code
 
-Install Forge as a Claude Code plugin:
+Install Forge as a marketplace — this enables the team `settings.json` workflow and is the recommended path:
 
 ```
-/plugin add https://github.com/jdforsythe/forge
+/plugin marketplace add jdforsythe/forge
+/plugin install forge@forge
 ```
 
-This registers Forge's skills globally. Claude Code discovers the `skills/` directory at the plugin root and makes all four core skills available in every project.
+Or install directly as a single command:
 
-**Alternative: Vercel's cross-agent installer:**
-
-```bash
-npx add-skill jdforsythe/forge
+```
+/plugin add jdforsythe/forge
 ```
 
-This detects your installed AI coding agents and copies skills into the correct locations automatically.
-
-**Alternative: Manual install** (if you prefer direct filesystem control):
-
-```bash
-git clone https://github.com/jdforsythe/forge.git
-# Then symlink or copy individual skills into ~/.claude/skills/
-ln -s $(pwd)/forge/skills/mission-planner ~/.claude/skills/mission-planner
-ln -s $(pwd)/forge/skills/agent-creator ~/.claude/skills/agent-creator
-ln -s $(pwd)/forge/skills/skill-creator ~/.claude/skills/skill-creator
-ln -s $(pwd)/forge/skills/librarian ~/.claude/skills/librarian
-```
+Both methods make all four core skills available in every project.
 
 ### Cowork
 
-Install Forge as a plugin or copy the skills directory into your Cowork skills folder:
+**Personal install:**
 
-```bash
-cp -r forge/skills/ ~/cowork/skills/
-```
+1. Open the Cowork app.
+2. Go to **Customize → Plugins**.
+3. Click **Add marketplace**, paste `jdforsythe/forge`, and confirm.
+4. Browse the marketplace and install **Forge**.
 
-Agent definitions and templates from `library/` are referenced automatically once the skills are installed.
+**Team/Enterprise install (admin):**
+
+1. Go to **Organization Settings → Plugins → Add marketplace**.
+2. Select GitHub, enter `jdforsythe/forge`, and confirm.
+3. Team members install Forge from the org marketplace catalog, or the admin enables it for all members.
 
 ---
 
