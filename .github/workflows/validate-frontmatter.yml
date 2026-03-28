@@ -1,0 +1,85 @@
+name: Validate Frontmatter
+
+on:
+  pull_request:
+    paths:
+      - 'skills/**/*.md'
+      - 'agents/**/*.md'
+      - 'library/agents/**/*.md'
+      - 'library/templates/**/*.md'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find markdown files in tracked directories
+        id: find-files
+        run: |
+          files=$(find skills/ agents/ library/agents/ library/templates/ -name '*.md' 2>/dev/null || true)
+          if [ -z "$files" ]; then
+            echo "No markdown files found. Skipping validation."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate YAML frontmatter
+        if: steps.find-files.outputs.skip != 'true'
+        run: |
+          errors=0
+
+          for file in $(find skills/ agents/ library/agents/ library/templates/ -name '*.md' 2>/dev/null); do
+            # Check that the file starts with ---
+            first_line=$(head -n 1 "$file")
+            if [ "$first_line" != "---" ]; then
+              echo "ERROR: $file does not start with YAML frontmatter (missing opening ---)"
+              errors=$((errors + 1))
+              continue
+            fi
+
+            # Check that there is a closing ---
+            closing=$(tail -n +2 "$file" | grep -n '^---$' | head -n 1)
+            if [ -z "$closing" ]; then
+              echo "ERROR: $file has no closing --- for frontmatter"
+              errors=$((errors + 1))
+              continue
+            fi
+
+            echo "OK: $file"
+          done
+
+          if [ "$errors" -gt 0 ]; then
+            echo ""
+            echo "Found $errors file(s) with invalid frontmatter."
+            exit 1
+          fi
+
+          echo ""
+          echo "All frontmatter is valid."
+
+      - name: Check SKILL.md line count
+        if: steps.find-files.outputs.skip != 'true'
+        run: |
+          errors=0
+
+          for file in $(find skills/ agents/ library/agents/ library/templates/ -name 'SKILL.md' 2>/dev/null); do
+            lines=$(wc -l < "$file")
+            if [ "$lines" -gt 500 ]; then
+              echo "ERROR: $file is $lines lines (max 500)"
+              errors=$((errors + 1))
+            else
+              echo "OK: $file ($lines lines)"
+            fi
+          done
+
+          if [ "$errors" -gt 0 ]; then
+            echo ""
+            echo "Found $errors SKILL.md file(s) exceeding 500 lines."
+            exit 1
+          fi
+
+          echo ""
+          echo "All SKILL.md files are within the line limit."
