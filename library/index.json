@@ -1,7 +1,44 @@
 {
   "version": 1,
   "updated": "2026-03-28T00:00:00Z",
-  "agents": [],
+  "agents": [
+    {
+      "name": "product-manager",
+      "domain": "software",
+      "path": "agents/software/product-manager.md",
+      "tags": ["product-management", "requirements", "PRD", "user-personas", "prioritization", "saas", "b2b", "stakeholder-management"],
+      "quality": "curated"
+    },
+    {
+      "name": "software-architect",
+      "domain": "software",
+      "path": "agents/software/software-architect.md",
+      "tags": ["architecture", "design", "systems", "technical-decisions", "ADR", "saas", "api-design", "domain-driven-design"],
+      "quality": "curated"
+    },
+    {
+      "name": "lead-engineer",
+      "domain": "software",
+      "path": "agents/software/lead-engineer.md",
+      "tags": ["engineering", "implementation", "code-review", "ci-cd", "deployment", "technical-debt", "testing", "saas"],
+      "quality": "curated"
+    },
+    {
+      "name": "qa-engineer",
+      "domain": "software",
+      "path": "agents/software/qa-engineer.md",
+      "tags": ["quality-assurance", "testing", "test-automation", "defect-tracking", "regression", "accessibility", "performance-testing", "saas"],
+      "quality": "curated"
+    }
+  ],
   "skills": [],
-  "templates": []
+  "templates": [
+    {
+      "name": "saas-product-team",
+      "domain": "software",
+      "path": "templates/saas-product-team.md",
+      "agent_count": 4,
+      "topology": "sequential-pipeline"
+    }
+  ]
 }
