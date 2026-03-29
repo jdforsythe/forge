@@ -23,21 +23,6 @@ Or install directly as a single command:
 
 Both methods make all four core skills available in every project.
 
-### Cowork
-
-**Personal install:**
-
-1. Open the Cowork app.
-2. Go to **Customize → Plugins**.
-3. Click **Add marketplace**, paste `jdforsythe/forge`, and confirm.
-4. Browse the marketplace and install **Forge**.
-
-**Team/Enterprise install (admin):**
-
-1. Go to **Organization Settings → Plugins → Add marketplace**.
-2. Select GitHub, enter `jdforsythe/forge`, and confirm.
-3. Team members install Forge from the org marketplace catalog, or the admin enables it for all members.
-
 ---
 
 ## Walkthrough 1: Build a SaaS Analytics Product

@@ -5,7 +5,7 @@ Science-backed AI team assembly. From goal to agents to artifacts.
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-Forge is an open-source system that uses research from DeepMind, PRISM persona science, and context engineering to assemble AI agent teams. It takes a goal, determines whether you need one agent or a team, selects the right coordination topology, and produces structured agent definitions with expert vocabulary, clear deliverables, and anti-pattern guardrails. Works with Claude Code and Cowork.
+Forge is an open-source system that uses research from DeepMind, PRISM persona science, and context engineering to assemble AI agent teams. It takes a goal, determines whether you need one agent or a team, selects the right coordination topology, and produces structured agent definitions with expert vocabulary, clear deliverables, and anti-pattern guardrails. Works with Claude Code.
 
 ## The Core Insight
 
@@ -24,12 +24,6 @@ npx add-skill jdforsythe/forge
 "Build me a SaaS analytics product"  # Mission Planner activates
 "Create an agent for code review"     # Agent Creator activates
 ```
-
-## Quick Start: Cowork
-
-**Personal:** Go to Customize → Plugins → Add marketplace, paste `jdforsythe/forge`, install Forge. Then start a conversation: *"I need to plan a marketing campaign"*
-
-**Team/Enterprise:** Admin adds `jdforsythe/forge` via Organization Settings → Plugins → Add marketplace. Team members install from the org catalog (or it auto-installs).
 
 ## What's Included
 
@@ -84,6 +78,10 @@ At every level, the same principles apply: real-world role titles, domain-specif
 Every design decision in Forge traces back to published research. The `docs/research/` directory contains synthesized findings from DeepMind's multi-agent scaling laws, PRISM persona science, and context engineering best practices.
 
 For the full methodology, see [METHODOLOGY.md](METHODOLOGY.md).
+
+## Known Issues
+
+- **Cowork compatibility**: Forge skills fail to run in Cowork. Skills load but stop executing when they attempt to read reference files outside the plugin directory. We are looking for help solving this — PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) if you want to take a crack at it.
 
 ## Contributing
 

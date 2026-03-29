@@ -2,7 +2,7 @@
 
 ## Is this a framework?
 
-No. Forge is not a framework, library, or runtime. It is a collection of pure markdown skills and agent definitions. There is no code to import, no dependencies to install, and no process to run. Claude Code and Cowork read the markdown files and use them as context to guide their behavior.
+No. Forge is not a framework, library, or runtime. It is a collection of pure markdown skills and agent definitions. There is no code to import, no dependencies to install, and no process to run. Claude Code reads the markdown files and uses them as context to guide its behavior.
 
 ## Do I need Python?
 
@@ -10,10 +10,10 @@ Only if you want to use `package_skill.py` for packaging skills into installable
 
 ## How is this different from other agent frameworks?
 
-Most agent frameworks run agents themselves — they provide orchestration, tool calling, memory, and execution loops. Forge does none of that. Instead, Forge creates high-quality agent definitions and skills that Claude Code and Cowork execute. The distinction matters:
+Most agent frameworks run agents themselves — they provide orchestration, tool calling, memory, and execution loops. Forge does none of that. Instead, Forge creates high-quality agent definitions and skills that Claude Code executes. The distinction matters:
 
 - **Other frameworks**: Framework runs agents, manages state, handles tool calls
-- **Forge**: Produces markdown definitions, Claude Code/Cowork handles execution
+- **Forge**: Produces markdown definitions, Claude Code handles execution
 
 This means Forge has zero runtime overhead, no vendor lock-in on orchestration, and works with whatever execution environment reads the definitions.
 

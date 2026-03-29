@@ -2,7 +2,7 @@
 
 ## Trust Model
 
-Forge provides markdown-based skills and agent definitions that are loaded and executed by Claude Code and Cowork. When a skill or agent definition is loaded, it becomes part of the active prompt context and can influence what code Claude generates and runs.
+Forge provides markdown-based skills and agent definitions that are loaded and executed by Claude Code. When a skill or agent definition is loaded, it becomes part of the active prompt context and can influence what code Claude generates and runs.
 
 **Skills and agent definitions from this repository are curated and reviewed.** However, third-party or user-contributed skills execute with the same permissions as the user running Claude Code. There is no sandbox boundary between a skill's instructions and your own commands.
 

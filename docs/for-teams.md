@@ -16,8 +16,6 @@ Each team member adds the Forge marketplace and installs the plugin once:
 /plugin install forge@forge
 ```
 
-**Cowork:** Go to Customize → Plugins → Add marketplace, paste `jdforsythe/forge`, then install Forge. Enterprise admins can push it to the whole org from Organization Settings → Plugins.
-
 ### The Project Layer
 
 For Claude Code teams, commit a `.claude/settings.json` to your repo. When team members trust the project folder, Claude Code prompts them to install the marketplace and plugin automatically — no manual step needed:
@@ -85,7 +83,7 @@ Store custom templates in your project's `.claude/templates/` directory and comm
 
 New team members get up to speed in two steps:
 
-1. **Install Forge once** — add the marketplace and install the plugin (Claude Code: `/plugin marketplace add jdforsythe/forge` + `/plugin install forge@forge`; Cowork: via the Customize → Plugins UI). If your repo has `.claude/settings.json` with `extraKnownMarketplaces`, Claude Code handles this automatically when they trust the project folder.
+1. **Install Forge once** — add the marketplace and install the plugin (`/plugin marketplace add jdforsythe/forge` + `/plugin install forge@forge`). If your repo has `.claude/settings.json` with `extraKnownMarketplaces`, Claude Code handles this automatically when they trust the project folder.
 2. **Clone the repo** — project-specific agent definitions in `.claude/agents/` activate automatically. Pre-configured templates give them a working setup for common tasks.
 
 Agent definitions encode team standards they would otherwise need to learn gradually. This reduces onboarding time from days to hours for AI-assisted workflows.
