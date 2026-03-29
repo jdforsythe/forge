@@ -67,7 +67,7 @@ The entry point and brain of the Forge system. Analyzes user goals, assesses com
    OUTPUT: Project context summary (or "greenfield — no existing context").
 
 2. Check library for existing resources.
-   IF ${CLAUDE_PLUGIN_ROOT}/library/index.json exists: Load and scan for matching agents, skills, and templates.
+   IF ./library/index.json exists: Load and scan for matching agents, skills, and templates.
    IF matching agents found: Note them for potential reuse.
    IF matching template found: Note it for potential adaptation.
    OUTPUT: Available library resources list.
@@ -100,20 +100,20 @@ The entry point and brain of the Forge system. Analyzes user goals, assesses com
 ### Phase 3: Route by Level
 
 5. **IF Level 0 — Single Agent Sufficient:**
-   Produce one agent definition following ${CLAUDE_PLUGIN_ROOT}/schemas/agent-definition.md format.
+   Produce one agent definition following ./schemas/agent-definition.md format.
    Include: role identity, domain vocabulary, deliverables, decision authority, SOP, anti-patterns, interaction model.
    IF matching agent exists in library: Load and adapt rather than creating from scratch.
    Package and present to user.
    DONE.
 
 6. **IF Level 1 — Team Warranted, Known Pattern:**
-   a. Select communication topology using the topology decision matrix (see ${CLAUDE_PLUGIN_ROOT}/skills/mission-planner/references/topology-guide.md).
-   b. IF matching template exists in ${CLAUDE_PLUGIN_ROOT}/library/templates/: Load template and adapt to specific goal.
+   a. Select communication topology using the topology decision matrix (see ./references/topology-guide.md).
+   b. IF matching template exists in ./library/templates/: Load template and adapt to specific goal.
    c. IF no template: Design team from scratch using topology selection rules.
    d. Determine team size: start at 3 agents, add only if genuinely different expertise required. Never exceed 5 without explicit justification.
    e. Define artifact chain: every agent produces a typed deliverable, every handoff has explicit format.
    f. Define quality gates: identify critical handoffs that require review before proceeding.
-   g. Present blueprint to user following ${CLAUDE_PLUGIN_ROOT}/schemas/team-blueprint.md format.
+   g. Present blueprint to user following ./schemas/team-blueprint.md format.
    h. WAIT for user approval before proceeding.
    i. Upon approval, for each role in the blueprint:
       IF matching agent exists in library: Load and adapt.
@@ -144,9 +144,9 @@ The entry point and brain of the Forge system. Analyzes user goals, assesses com
 
 ## Output Format
 
-The Mission Planner produces team blueprints following the format specified in `${CLAUDE_PLUGIN_ROOT}/schemas/team-blueprint.md`.
+The Mission Planner produces team blueprints following the format specified in `./schemas/team-blueprint.md`.
 
-For single-agent results (Level 0), produce an agent definition following `${CLAUDE_PLUGIN_ROOT}/schemas/agent-definition.md`.
+For single-agent results (Level 0), produce an agent definition following `./schemas/agent-definition.md`.
 
 Every blueprint includes:
 - YAML frontmatter (goal, domain, complexity, topology, agent_count, estimated_cost_tier)
@@ -246,8 +246,8 @@ This skill activates when the user asks any of the following (or variations):
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/skills/mission-planner/references/scaling-laws.md` — DeepMind scaling criteria, 45% threshold, cost multipliers
-- `${CLAUDE_PLUGIN_ROOT}/skills/mission-planner/references/topology-guide.md` — Topology decision matrix and selection flowchart
-- `${CLAUDE_PLUGIN_ROOT}/skills/mission-planner/references/team-templates.md` — Pre-built team templates for common project archetypes
-- `${CLAUDE_PLUGIN_ROOT}/schemas/team-blueprint.md` — Output format specification
-- `${CLAUDE_PLUGIN_ROOT}/schemas/agent-definition.md` — Agent definition format for individual roles
+- `./references/scaling-laws.md` — DeepMind scaling criteria, 45% threshold, cost multipliers
+- `./references/topology-guide.md` — Topology decision matrix and selection flowchart
+- `./references/team-templates.md` — Pre-built team templates for common project archetypes
+- `./schemas/team-blueprint.md` — Output format specification
+- `./schemas/agent-definition.md` — Agent definition format for individual roles

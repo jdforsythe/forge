@@ -221,7 +221,7 @@ This skill uses Anthropic's native `.skill` packaging mechanism (validate, zip, 
 - Progressive disclosure (three-level context loading)
 - Few-shot superiority (examples beat verbose instructions)
 
-See `${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/references/skill-principles.md` for the condensed research and `${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/references/skill-template.md` for an annotated gold-standard example.
+See `./references/skill-principles.md` for the condensed research and `./references/skill-template.md` for an annotated gold-standard example.
 
 ---
 

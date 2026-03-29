@@ -103,7 +103,7 @@ The curation and maintenance engine for the Forge library. Audits inventory, det
 
 7. **Core overlap check.**
    FOR each library item:
-     a. Compare against the core skills in `${CLAUDE_PLUGIN_ROOT}/skills/` directory (mission-planner, agent-creator, skill-creator, librarian).
+     a. Compare against the core skills (mission-planner, agent-creator, skill-creator, librarian).
      b. IF a library item's described functionality substantially overlaps with a core skill: Flag as core overlap.
    OUTPUT: List of items that may duplicate core skill functionality.
 
@@ -363,6 +363,6 @@ This skill activates when the user asks any of the following (or variations):
 
 ## References
 
-- `${CLAUDE_PLUGIN_ROOT}/skills/librarian/references/review-criteria.md` — Scoring rubrics, threshold definitions, and merge strategy details
-- `${CLAUDE_PLUGIN_ROOT}/schemas/index-schema.json` — Library index format specification
-- `${CLAUDE_PLUGIN_ROOT}/schemas/usage-log-schema.json` — Usage log entry format specification
+- `./references/review-criteria.md` — Scoring rubrics, threshold definitions, and merge strategy details
+- `./schemas/index-schema.json` — Library index format specification
+- `./schemas/usage-log-schema.json` — Usage log entry format specification

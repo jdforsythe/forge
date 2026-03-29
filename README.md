@@ -35,32 +35,35 @@ npx add-skill jdforsythe/forge
 
 ```
 forge/
-├── plugins/forge/       The plugin package
-│   ├── skills/          4 core skills
-│   │   ├── mission-planner/   Decomposes goals into team blueprints
-│   │   ├── agent-creator/     Builds individual agent definitions
-│   │   ├── skill-creator/     Creates reusable skill packages
-│   │   └── librarian/         Manages the agent/template library
-│   │
-│   ├── agents/          3 infrastructure agents
-│   │   ├── verifier.md        Validates outputs against schemas
-│   │   ├── researcher.md      Gathers context and source material
-│   │   └── reviewer.md        Reviews and critiques agent definitions
-│   │
-│   ├── library/         Starter collection
-│   │   └── index.json         11 domain agents, 3 team templates
-│   │       ├── software/      Product Manager, Architect, Lead Engineer, QA
-│   │       ├── marketing/     Campaign Strategist, Content Creator, Designer, Analytics Lead
-│   │       └── security/      Lead Auditor, Penetration Tester, Compliance Analyst
-│   │
-│   └── schemas/         Format specifications
-│       ├── agent-definition.md    7-component agent structure
-│       ├── team-blueprint.md      Blueprint format for coordinated teams
-│       ├── index-schema.json      Library index format
-│       └── usage-log-schema.json  Usage tracking format
+├── .claude-plugin/      Plugin metadata
+│   ├── marketplace.json     Marketplace definition
+│   └── plugin.json          Plugin manifest
 │
-├── research/        Scientific foundation (8 reference documents)
-├── docs/            User documentation
+├── skills/              4 core skills
+│   ├── mission-planner/     Decomposes goals into team blueprints
+│   ├── agent-creator/       Builds individual agent definitions
+│   ├── skill-creator/       Creates reusable skill packages
+│   └── librarian/           Manages the agent/template library
+│
+├── agents/              3 infrastructure agents
+│   ├── verifier.md          Validates outputs against schemas
+│   ├── researcher.md        Gathers context and source material
+│   └── reviewer.md          Reviews and critiques agent definitions
+│
+├── library/             Starter collection
+│   └── index.json           11 domain agents, 3 team templates
+│       ├── software/        Product Manager, Architect, Lead Engineer, QA
+│       ├── marketing/       Campaign Strategist, Content Creator, Designer, Analytics Lead
+│       └── security/        Lead Auditor, Penetration Tester, Compliance Analyst
+│
+├── schemas/             Format specifications
+│   ├── agent-definition.md      7-component agent structure
+│   ├── team-blueprint.md        Blueprint format for coordinated teams
+│   ├── index-schema.json        Library index format
+│   └── usage-log-schema.json    Usage tracking format
+│
+├── docs/                User documentation
+│   └── research/            Scientific foundation (8 reference documents)
 └── ...
 ```
 
@@ -78,7 +81,7 @@ At every level, the same principles apply: real-world role titles, domain-specif
 
 ## Research Foundation
 
-Every design decision in Forge traces back to published research. The `research/` directory contains synthesized findings from DeepMind's multi-agent scaling laws, PRISM persona science, and context engineering best practices.
+Every design decision in Forge traces back to published research. The `docs/research/` directory contains synthesized findings from DeepMind's multi-agent scaling laws, PRISM persona science, and context engineering best practices.
 
 For the full methodology, see [METHODOLOGY.md](METHODOLOGY.md).
 

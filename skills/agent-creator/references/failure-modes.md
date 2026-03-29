@@ -187,4 +187,4 @@ When building any agent definition, verify these failure mode preventions are in
 
 ---
 
-*Source: Extracted from research/failure-taxonomy.md (MAST framework) for Agent Creator skill use.*
+*Source: Extracted from docs/research/failure-taxonomy.md (MAST framework) for Agent Creator skill use.*

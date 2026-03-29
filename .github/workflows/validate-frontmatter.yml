@@ -3,10 +3,10 @@ name: Validate Frontmatter
 on:
   pull_request:
     paths:
-      - 'plugins/forge/skills/**/*.md'
-      - 'plugins/forge/agents/**/*.md'
-      - 'plugins/forge/library/agents/**/*.md'
-      - 'plugins/forge/library/templates/**/*.md'
+      - 'skills/**/*.md'
+      - 'agents/**/*.md'
+      - 'library/agents/**/*.md'
+      - 'library/templates/**/*.md'
 
 jobs:
   validate:
@@ -18,7 +18,7 @@ jobs:
       - name: Find markdown files in tracked directories
         id: find-files
         run: |
-          files=$(find plugins/forge/skills/ plugins/forge/agents/ plugins/forge/library/agents/ plugins/forge/library/templates/ -name '*.md' 2>/dev/null || true)
+          files=$(find skills/ agents/ library/agents/ library/templates/ -name '*.md' 2>/dev/null || true)
           if [ -z "$files" ]; then
             echo "No markdown files found. Skipping validation."
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -31,7 +31,7 @@ jobs:
         run: |
           errors=0
 
-          for file in $(find plugins/forge/skills/ plugins/forge/agents/ plugins/forge/library/agents/ plugins/forge/library/templates/ -name '*.md' -not -path '*/references/*' 2>/dev/null); do
+          for file in $(find skills/ agents/ library/agents/ library/templates/ -name '*.md' -not -path '*/references/*' 2>/dev/null); do
             # Check that the file starts with ---
             first_line=$(head -n 1 "$file")
             if [ "$first_line" != "---" ]; then
@@ -65,7 +65,7 @@ jobs:
         run: |
           errors=0
 
-          for file in $(find plugins/forge/skills/ plugins/forge/agents/ plugins/forge/library/agents/ plugins/forge/library/templates/ -name 'SKILL.md' 2>/dev/null); do
+          for file in $(find skills/ agents/ library/agents/ library/templates/ -name 'SKILL.md' 2>/dev/null); do
             lines=$(wc -l < "$file")
             if [ "$lines" -gt 500 ]; then
               echo "ERROR: $file is $lines lines (max 500)"

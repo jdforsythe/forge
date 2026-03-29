@@ -126,11 +126,11 @@ Forge operationalizes this by requiring every agent definition to specify its de
 | Hong et al., MetaGPT | 2023 | Structured artifacts reduce error propagation ~40% | Principle 6 |
 | Anthropic, "Building Effective Agents" | 2024 | Structured handoffs as default communication pattern | Principle 6 |
 
-Full research notes with detailed findings, data tables, and implementation guidance are in the [`research/`](research/) directory:
+Full research notes with detailed findings, data tables, and implementation guidance are in the [`docs/research/`](docs/research/) directory:
 
-- [`vocabulary-routing.md`](research/vocabulary-routing.md) -- Term selection, clustering, the 15-year practitioner test
-- [`persona-science.md`](research/persona-science.md) -- PRISM findings, persona length effects, role-task alignment
-- [`scaling-laws.md`](research/scaling-laws.md) -- DeepMind principles, cost multipliers, topology selection
-- [`context-engineering.md`](research/context-engineering.md) -- Attention budget, U-curve, progressive disclosure layers
-- [`failure-taxonomy.md`](research/failure-taxonomy.md) -- All 14 MAST failure modes with detection and prevention
-- [`team-design.md`](research/team-design.md) -- MetaGPT findings, Captain Agent, cascade pattern, topology comparison
+- [`vocabulary-routing.md`](docs/research/vocabulary-routing.md) -- Term selection, clustering, the 15-year practitioner test
+- [`persona-science.md`](docs/research/persona-science.md) -- PRISM findings, persona length effects, role-task alignment
+- [`scaling-laws.md`](docs/research/scaling-laws.md) -- DeepMind principles, cost multipliers, topology selection
+- [`context-engineering.md`](docs/research/context-engineering.md) -- Attention budget, U-curve, progressive disclosure layers
+- [`failure-taxonomy.md`](docs/research/failure-taxonomy.md) -- All 14 MAST failure modes with detection and prevention
+- [`team-design.md`](docs/research/team-design.md) -- MetaGPT findings, Captain Agent, cascade pattern, topology comparison

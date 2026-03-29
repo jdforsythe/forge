@@ -148,4 +148,4 @@ When building Step 4b (Vocabulary Payload):
 
 ---
 
-*Source: Extracted from research/persona-science.md for Agent Creator skill use.*
+*Source: Extracted from docs/research/persona-science.md for Agent Creator skill use.*

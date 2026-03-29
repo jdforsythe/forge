@@ -127,4 +127,4 @@ Can a single well-prompted agent with appropriate tools handle this?
 
 ---
 
-*Adapted from research/scaling-laws.md for Mission Planner operational use.*
+*Adapted from docs/research/scaling-laws.md for Mission Planner operational use.*
