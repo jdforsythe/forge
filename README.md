@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="graphics/forge-logo.svg" alt="Forge" width="200" />
+</p>
+
 # Forge
 
 Science-backed AI team assembly. From goal to agents to artifacts.
