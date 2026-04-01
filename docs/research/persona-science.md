@@ -9,13 +9,13 @@
 The PRISM (Persona Research in Instruction-following and Systematic Measurement) framework studied how persona assignment affects LLM output quality. Three key findings:
 
 ### Finding 1: Brief Identities Work Best
-Role assignments under **50 tokens** produce the highest-quality outputs. Longer persona descriptions (100+ tokens) degrade accuracy. The model spends attention processing the persona description rather than the task.
+Accuracy damage scales with persona length — the longer the identity, the greater the degradation. Identities should be the minimum length required to convey role, responsibility, and organizational context: no shorter, no longer. Under 50 tokens is the practical sweet spot. The model spends attention processing the persona description rather than the task.
 
 ### Finding 2: Real Job Titles Activate Training Data Clusters
 "You are a senior site reliability engineer" activates SRE-related training data more effectively than "You are an expert in keeping systems running." Real titles that exist in real organizations have dense representation in training data.
 
 ### Finding 3: Flattery Degrades Output
-"You are the world's best programmer" performs **worse** than "You are a software engineer." Superlatives activate generic aspirational text patterns (motivational content, marketing copy) rather than domain expertise clusters.
+"You are the world's best programmer" performs **worse** than "You are a software engineer." This is explained by vocabulary routing: superlatives route to motivational/marketing embedding clusters rather than domain expertise clusters (Ranjan et al., 2024). Define roles through knowledge and behavior, not quality claims.
 
 ---
 
@@ -70,11 +70,11 @@ Persona effectiveness depends entirely on whether the role matches the task doma
 ## Practical Persona Design Rules
 
 1. **Use real job titles** that exist in real organizations. "Senior site reliability engineer" not "system health guardian."
-2. **Keep identity under 50 tokens.** This is the empirically optimal length from PRISM.
+2. **Keep identity under 50 tokens.** Accuracy damage scales with persona length; under 50 tokens is the practical sweet spot from PRISM (2026).
 3. **Define through knowledge and behavior,** not quality claims. Say what they know and do, not how good they are.
 4. **Include organizational context.** "Reports to [X], collaborates with [Y]" establishes scope boundaries and activates team-dynamic knowledge.
 5. **Pair identity with domain vocabulary.** The persona activates a broad cluster; vocabulary terms narrow it to specific sub-domains.
-6. **Never use superlatives.** Banned: "world-class," "best," "expert," "genius," "leading," "top-tier."
+6. **Never use superlatives.** Banned: "world-class," "best," "expert," "genius," "leading," "top-tier." Superlatives route to motivational/marketing clusters rather than domain expertise (Ranjan et al., 2024).
 7. **One role per agent.** Do not assign multiple job titles. Pick the one most relevant to the primary task.
 
 ---
@@ -106,13 +106,13 @@ The bad example wastes ~60 tokens on flattery, activates generic motivational te
 
 | Metric | Value | Source |
 |---|---|---|
-| Optimal persona length | <50 tokens | PRISM |
-| Accuracy degradation threshold | >100 tokens | PRISM |
+| Optimal persona length | <50 tokens | PRISM (2026) |
+| Accuracy degradation threshold | >100 tokens | PRISM (2026) |
 | Vocabulary payload | 15-30 terms | Vocabulary routing research |
 | Vocabulary clusters | 3-5 per agent | Vocabulary routing research |
-| Role-task alignment effect | Strong positive when aligned | PRISM |
-| Flattery effect | Negative (degrades accuracy) | PRISM |
+| Role-task alignment effect | Strong positive when aligned | PRISM (2026) |
+| Flattery effect | Negative (degrades accuracy) | Ranjan et al. (2024) |
 
 ---
 
-*Source: Skill Design Research Synthesis §3.1-3.5, PRISM framework*
+*Source: Skill Design Research Synthesis §3.1-3.5, PRISM framework (arxiv.org/abs/2603.18507)*

@@ -12,7 +12,7 @@ PRISM (Persona Research in Instruction-following and Systematic Measurement) stu
 
 ## Finding 1: Brief Identities Produce the Best Results
 
-Role assignments under **50 tokens** produce the highest-quality outputs. This is the empirically optimal length.
+Accuracy damage scales with persona length — the longer the identity, the greater the degradation. Identities should be the minimum length required to convey role, responsibility, and organizational context: no shorter, no longer. Under 50 tokens is the practical sweet spot.
 
 | Persona Length | Tokens | Alignment | Accuracy | Verdict |
 |---|---|---|---|---|
@@ -50,7 +50,7 @@ Role assignments under **50 tokens** produce the highest-quality outputs. This i
 
 "You are the world's best programmer" performs **worse** than "You are a software engineer."
 
-**Mechanism:** Superlatives activate generic aspirational text patterns — motivational content, marketing copy, inspirational writing — rather than domain expertise clusters. The model shifts toward producing text that sounds impressive rather than text that is correct.
+**Mechanism:** As demonstrated by Ranjan et al. (2024), "One Word Is Not Enough," superlatives route to motivational/marketing embedding clusters rather than domain expertise clusters. The model shifts toward producing text that sounds impressive rather than text that is correct.
 
 **Banned terms in Forge agent identities:**
 - "world-class," "best," "expert," "genius," "leading," "top-tier"
@@ -125,7 +125,7 @@ Persona effectiveness depends entirely on whether the role matches the task doma
 | Accuracy degradation threshold | >100 tokens | Hard ceiling — never exceed |
 | Vocabulary payload size | 15-30 terms | Separate from identity |
 | Vocabulary clusters | 3-5 per agent | Organize terms by sub-domain |
-| Flattery effect | Negative on accuracy | Zero tolerance in Forge agents |
+| Flattery effect | Negative on accuracy (Ranjan et al., 2024) | Zero tolerance in Forge agents |
 | Alignment improvement | Strongest at <50 tokens | Diminishing returns beyond |
 | Role-task alignment | Required for positive effect | Verify before finalizing |
 
@@ -148,4 +148,4 @@ When building Step 4b (Vocabulary Payload):
 
 ---
 
-*Source: Extracted from docs/research/persona-science.md for Agent Creator skill use.*
+*Source: Extracted from docs/research/persona-science.md for Agent Creator skill use. PRISM: arxiv.org/abs/2603.18507; Ranjan et al. (2024): arxiv.org/abs/2512.06744*

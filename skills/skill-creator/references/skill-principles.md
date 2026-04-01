@@ -101,7 +101,7 @@
 - BAD: "First you should check if there are any anti-patterns, and if so you should probably address them."
 - GOOD: "1. Scan input for anti-patterns. IF detected: apply Detect-Name-Explain-Resolve-Prevent. IF none: proceed to step 2."
 
-*Source: Anthropic Claude docs; Voyce (2025) comparative study; Vaarta Analytics (2026)*
+*Source: Anthropic Claude docs; He et al. (2025) comparative study; Vaarta Analytics (2026)*
 
 ---
 

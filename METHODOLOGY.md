@@ -16,7 +16,7 @@ Three rules govern term selection. First, the **15-year practitioner test**: wou
 
 The inverse matters too. Generic consultant-speak ("leverage," "best practices," "robust solution") activates generic business writing clusters. Buzzword stacking ("AI-driven blockchain microservices with DevSecOps") creates a scatter-shot pattern where no single knowledge cluster dominates. Both are banned in Forge agent definitions.
 
-**The evidence:** Ranjan et al. (2024), "One Word Is Not Enough," demonstrated that precise terminology significantly outperforms generic language in activating domain-specific model knowledge. The Anthropic context engineering guide and IBM prompt engineering documentation both identify vocabulary specificity as a primary driver of output quality. Forge's own findings from the Impeccable project confirmed that swapping generic terms for expert vocabulary measurably improved output without any other changes to prompts.
+**The evidence:** Ranjan et al. (2024), "One Word Is Not Enough," demonstrated that precise terminology significantly outperforms generic language in activating domain-specific model knowledge. The same research explains why flattery fails: superlatives route to motivational/marketing embedding clusters rather than domain expertise clusters. The Anthropic context engineering guide and IBM prompt engineering documentation both identify vocabulary specificity as a primary driver of output quality. Forge's own findings from the Impeccable project confirmed that swapping generic terms for expert vocabulary measurably improved output without any other changes to prompts.
 
 ---
 
@@ -26,13 +26,13 @@ The inverse matters too. Generic consultant-speak ("leverage," "best practices,"
 
 **Why it works:** The PRISM (Persona Research in Instruction-following and Systematic Measurement) framework studied how persona assignment affects LLM output. Three findings shape Forge's approach.
 
-First, **brief identities outperform long ones.** Role assignments under 50 tokens produce the highest-quality outputs. At 100+ tokens, accuracy degrades because the model spends its attention budget processing the persona description instead of the task. Second, **real job titles activate real knowledge clusters.** "You are a senior site reliability engineer" activates SRE-related training data -- runbooks, incident response, SLO definitions -- more effectively than "You are an expert in keeping systems running." Real titles that exist in real organizations have dense representation in the training corpus. Third, **flattery degrades output.** "You are the world's best programmer" performs worse than "You are a software engineer." Superlatives activate generic aspirational content -- motivational writing, marketing copy -- rather than domain expertise.
+First, **brief identities outperform long ones.** Accuracy damage scales with persona length -- the longer the identity, the greater the degradation. Identities should be the minimum length required to convey role, responsibility, and organizational context. Under 50 tokens is the practical sweet spot. Second, **real job titles activate real knowledge clusters.** "You are a senior site reliability engineer" activates SRE-related training data -- runbooks, incident response, SLO definitions -- more effectively than "You are an expert in keeping systems running." Real titles that exist in real organizations have dense representation in the training corpus. Third, **flattery degrades output.** "You are the world's best programmer" performs worse than "You are a software engineer." As Ranjan et al. (2024) demonstrated, superlatives route to motivational/marketing embedding clusters rather than domain expertise clusters.
 
 There is a tension at play. PRISM identified an **alignment-accuracy tradeoff**: stronger personas improve instruction following (the model does what you ask) but can reduce factual accuracy (the model says what sounds right for the role rather than what is correct). The solution is to keep identities brief and grounded. A 30-token realistic role identity gets high alignment without significant accuracy loss. A 200-token elaborate persona gets extreme alignment with significantly degraded accuracy.
 
 Forge operationalizes this with a strict format: real job title, primary responsibility, organizational context, reporting relationships. No superlatives. No quality claims. One role per agent -- combining titles ("You are a software architect and project manager and QA lead") fragments knowledge activation across multiple clusters.
 
-**The evidence:** The PRISM persona framework established the <50 token optimum and documented the alignment-accuracy tradeoff. The DigitalOcean prompt engineering guide independently reached similar conclusions about role specificity. Anthropic's harness design research confirmed that brief, realistic identities outperform elaborate persona descriptions.
+**The evidence:** The PRISM persona framework (2026, arxiv.org/abs/2603.18507) established the <50 token optimum and documented the alignment-accuracy tradeoff. Ranjan et al. (2024), "One Word Is Not Enough" (arxiv.org/abs/2512.06744), demonstrated the vocabulary routing mechanism that explains why flattery and superlatives degrade output quality. The DigitalOcean prompt engineering guide independently reached similar conclusions about role specificity. Anthropic's harness design research confirmed that brief, realistic identities outperform elaborate persona descriptions.
 
 ---
 
@@ -112,10 +112,10 @@ Forge operationalizes this by requiring every agent definition to specify its de
 
 | Source | Year | Key Contribution | Used In |
 |---|---|---|---|
-| Ranjan et al., "One Word Is Not Enough" | 2024 | Vocabulary specificity activates domain knowledge clusters | Principle 1 |
+| Ranjan et al., "One Word Is Not Enough" | 2024 | Vocabulary specificity activates domain knowledge clusters; superlatives route to marketing clusters | Principles 1, 2 |
 | Anthropic, Context Engineering Guide | 2024 | Progressive disclosure, attention budget, layered context | Principles 1, 5 |
 | IBM, Prompt Engineering Documentation | 2024 | Vocabulary precision as quality driver | Principle 1 |
-| PRISM Persona Framework | 2024 | <50 token identities, alignment-accuracy tradeoff, flattery effects | Principle 2 |
+| PRISM Persona Framework | 2026 | <50 token identities, alignment-accuracy tradeoff | Principle 2 |
 | DigitalOcean, Prompt Engineering Guide | 2024 | Role specificity for knowledge activation | Principle 2 |
 | DeepMind, Multi-Agent Scaling Study | 2025 | Saturation at 4 agents, 45% threshold, cost multipliers | Principle 3 |
 | Captain Agent Research | 2024 | Adaptive team composition outperforms static by 15-25% | Principle 3 |

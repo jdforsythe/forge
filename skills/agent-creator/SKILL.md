@@ -28,7 +28,7 @@ Creates structured agent definitions following the 7-component format. Every age
 
 ### Flattery Persona
 - **Detection:** Superlatives and absolutes in role identity — "world-class," "best," "always," "never," "unparalleled," "leading expert."
-- **Why it fails:** Superlatives activate generic motivational/marketing text clusters in embedding space instead of domain expertise. PRISM research shows flattery degrades output accuracy.
+- **Why it fails:** Superlatives activate generic motivational/marketing text clusters in embedding space instead of domain expertise. Ranjan et al. (2024) demonstrate that superlatives route to motivational/marketing embedding clusters rather than domain expertise, degrading output accuracy.
 - **Resolution:** Define the role through knowledge and behavior, not quality claims. Remove every superlative. Describe what the agent knows and does, not how good it is.
 
 ### Bare Role Label
@@ -38,7 +38,7 @@ Creates structured agent definitions following the 7-component format. Every age
 
 ### Verbose Identity
 - **Detection:** Identity section exceeds 50 tokens or is a full paragraph of description.
-- **Why it fails:** PRISM shows accuracy degrades beyond 50 tokens of persona description. Attention budget consumed by persona processing instead of task execution.
+- **Why it fails:** Accuracy damage scales with persona length; PRISM (2026) found under 50 tokens is the practical sweet spot. Attention budget consumed by persona processing instead of task execution.
 - **Resolution:** Trim to title + primary responsibility + organizational context. Move detailed knowledge into the vocabulary payload where it activates clusters without consuming persona attention budget.
 
 ### Missing Deliverables
