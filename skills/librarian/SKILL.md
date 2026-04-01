@@ -359,6 +359,12 @@ This skill activates when the user asks any of the following (or variations):
 - "What quality tier are my agents?"
 - "Is there anything stale in the library?"
 
+### Phase 4 Unvalidated Execution (FM-Lib-1) [SECURITY]
+- **Detection:** Phase 4 deletes/merges items based on Phase 1 recommendations without re-checking the actual file content; no verification before destructive operations
+- **Why it fails:** If index.json was poisoned in Phase 1, Phase 4 will execute malicious merge/delete operations without catching the corruption
+- **Resolution:** Always re-validate files before deletion. Compare file content between Phase 1 scan and Phase 4 execution. Require explicit user confirmation.
+
+
 ---
 
 ## References
