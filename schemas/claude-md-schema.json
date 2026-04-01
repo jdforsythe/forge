@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CLAUDE.md Configuration Schema",
+  "description": "Validates CLAUDE.md project context files. Prevents prompt injection through configuration poisoning.",
+  "type": "object",
+  "properties": {
+    "project_name": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Human-readable project name"
+    },
+    "tech_stack": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 100
+      },
+      "maxItems": 20,
+      "description": "Technologies used in project (e.g., 'TypeScript', 'React', 'PostgreSQL')"
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 200
+      },
+      "maxItems": 10,
+      "description": "Project constraints (e.g., 'HIPAA compliance required', 'AWS-only deployment')"
+    },
+    "team_preferences": {
+      "type": "object",
+      "properties": {
+        "code_review_style": {
+          "type": "string",
+          "enum": ["conventional-comments", "simple", "strict"],
+          "description": "Code review convention preference"
+        },
+        "communication_format": {
+          "type": "string",
+          "enum": ["detailed", "concise", "formal"],
+          "description": "Preferred communication style"
+        }
+      },
+      "additionalProperties": false
+    },
+    "integrations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 100
+      },
+      "maxItems": 10,
+      "description": "External tools or systems (e.g., 'Jira', 'Slack', 'GitHub')"
+    }
+  },
+  "additionalProperties": false,
+  "required": [],
+  "not": {
+    "properties": {
+      "project_name": {
+        "type": "string",
+        "pattern": "(?i)(OVERRIDE|INJECT|IGNORE|BYPASS|MALICIOUS|ESCALAT)"
+      },
+      "tech_stack": {
+        "type": "array",
+        "contains": {
+          "type": "string",
+          "pattern": "(?i)(OVERRIDE|INJECT|IGNORE|BYPASS|MALICIOUS)"
+        }
+      },
+      "constraints": {
+        "type": "array",
+        "contains": {
+          "type": "string",
+          "pattern": "(?i)(OVERRIDE|INJECT|IGNORE|BYPASS|MALICIOUS|disable.*check|skip.*valid)"
+        }
+      }
+    }
+  }
+}
