@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Forge Library Index Schema",
+  "description": "Validates library/index.json. Includes security checks to prevent prompt injection through library metadata.",
+  "type": "object",
+  "required": ["agents", "skills", "templates", "metadata"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["version", "lastUpdated"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "securityValidationRequired": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "path", "domain", "quality"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "maxLength": 50
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^library/agents/[a-z-]+/[a-z0-9-]+\\.md$"
+          },
+          "domain": {
+            "type": "string",
+            "enum": ["software", "marketing", "security", "operations", "design", "custom"]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "quality": {
+            "type": "string",
+            "enum": ["untested", "tested", "curated"]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 50
+            },
+            "maxItems": 15
+          },
+          "created": {
+            "type": "string",
+            "format": "date"
+          },
+          "source": {
+            "type": "string",
+            "enum": ["manual", "jit-generated", "template-derived"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "path"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "maxLength": 50
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^skills/[a-z0-9-]+/SKILL\\.md$"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "category": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 50
+            },
+            "maxItems": 15
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "path", "domain"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "maxLength": 50
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^library/templates/[a-z0-9-]+\\.md$"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "agent_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "complexity": {
+            "type": "string",
+            "enum": ["simple", "moderate", "complex"]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 50
+            },
+            "maxItems": 15
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "not": {
+    "properties": {
+      "agents": {
+        "type": "array",
+        "contains": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "pattern": "(?i)(OVERRIDE|INJECT|HIDDEN|BYPASS|MALICIOUS|escalat.*ignore)"
+            }
+          }
+        }
+      },
+      "templates": {
+        "type": "array",
+        "contains": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "pattern": "(?i)(OVERRIDE|INJECT|HIDDEN|BYPASS|MALICIOUS|escalat.*ignore)"
+            }
+          }
+        }
+      }
+    }
+  }
+}
