@@ -40,14 +40,14 @@ You are a [real job title] responsible for [primary responsibility] within [orga
 **Rules:**
 - Use a title that exists in real organizations
 - Include reporting/collaboration context to establish boundaries
-- Keep under 50 tokens — PRISM research shows longer personas degrade accuracy
+- Keep to ~20-50 tokens (Forge convention). PRISM (Hu et al. 2026) found that on knowledge tasks, damage grows with persona length — but no study sets a specific token cutoff; this range is a design standard, not a measured threshold
 - Define the role through what they KNOW and DO, not how good they are
 
 ---
 
 ## Component 2: Domain Vocabulary Payload (15-30 terms)
 
-Precise terms a senior practitioner (15+ years) uses daily. These route the model to expert knowledge clusters in embedding space.
+Precise terms a senior practitioner (15+ years) uses daily. These steer output toward expert register and framing (vocabulary routing — see docs/research/vocabulary-routing.md). "Embedding cluster" language is a working mental model, not a proven mechanism.
 
 **Format:**
 ```markdown
@@ -58,7 +58,7 @@ Precise terms a senior practitioner (15+ years) uses daily. These route the mode
 ```
 
 **Rules:**
-- 15-30 terms organized in 3-5 clusters of 3-8 related terms
+- 15-30 terms organized in 3-5 clusters of 3-8 related terms (Forge design standard — coverage without dilution, not a measured optimum)
 - Include framework originators where applicable: "INVEST criteria (Bill Wake)"
 - No consultant-speak: "best practices," "leverage," "synergy" are banned
 - The 15-year practitioner test: would a senior use this exact term with a peer?

@@ -17,7 +17,7 @@ Research-enhanced skill creator that produces higher-quality skills than built-i
 ## Expert Vocabulary Payload
 
 **Prompt Engineering & Routing:**
-expert vocabulary payload, dual-register description, vocabulary routing, embedding space routing, attention budget, distribution center, right altitude, retrieval anchor
+expert vocabulary payload, dual-register description, vocabulary routing, distributional convergence, attention budget, distribution center, right altitude, retrieval anchor
 
 **Skill Architecture:**
 progressive disclosure, context window management, U-shaped attention curve, YAML frontmatter, trigger surface, structural delineation, three-level loading (metadata / SKILL.md / references)
@@ -52,7 +52,7 @@ These are anti-patterns in the **skills this creator generates**. Scan every gen
 
 ### 5. Edge-Case Stuffing
 **Detection:** More than 15 specific edge-case rules. Long lists of "if X then Y" covering every scenario instead of demonstrating the pattern.
-**Resolution:** Replace with 2-3 diverse canonical examples that show the pattern. Include one hard case. Let the model generalize from examples rather than memorize rules. Research shows 2-3 examples often match the effectiveness of 9+.
+**Resolution:** Replace with 3-5 diverse canonical examples that show the pattern. Include one hard case. Let the model generalize from examples rather than memorize rules. Anthropic's documented recommendation is 3-5 examples; LangChain found 3 examples roughly matched 9 in effectiveness on their benchmark (diminishing returns, not a hard ceiling).
 
 ### 6. Paragraph-Form Logic
 **Detection:** Complex multi-step behavior described in prose paragraphs. No numbered steps, no IF/THEN conditions, no imperative verbs.
@@ -60,7 +60,15 @@ These are anti-patterns in the **skills this creator generates**. Scan every gen
 
 ### 7. Missing Examples
 **Detection:** Zero input-to-output examples or BAD/GOOD pairs in the generated skill. The skill relies entirely on verbal instructions.
-**Resolution:** Add 2-3 diverse examples. Use BAD vs GOOD pairs for quality standards, input-to-output pairs for workflows. Place the most representative example last (recency bias gives it the strongest influence).
+**Resolution:** Add 3-5 diverse examples. Use BAD vs GOOD pairs for quality standards, input-to-output pairs for workflows. Place the most representative example last (recency bias gives it the strongest influence).
+
+### 8. Over-Prescription for Current Models
+**Detection:** The generated SKILL.md enumerates exhaustive rules, hedges every instruction, or reads like it was tuned for an older, weaker model — dense and enumerative even where the vocabulary and anti-pattern sections are lean.
+**Resolution:** State the goal, the boundaries, and the verification standard; let the model fill in competent defaults. Keep the description pushy (triggering is still the weak point) but keep the body lean. When migrating an existing skill to a newer model generation, test whether REMOVING instructions improves output before adding more.
+
+### 9. Reasoning-Echo Instructions
+**Detection:** Behavioral instructions tell the model to "show your chain of thought," "transcribe your reasoning process," or "explain your internal thinking step by step."
+**Resolution:** Replace with a request for a conclusion plus brief stated rationale (e.g., "state the tier and explain why in one sentence"). Manual CoT scaffolding is deprecated now that adaptive thinking handles this internally; on Claude Fable 5, instructing reasoning-echo can trigger the reasoning-extraction refusal classifier and fail the request outright.
 
 ---
 
@@ -82,10 +90,12 @@ These are anti-patterns in the **skills this creator generates**. Scan every gen
 
 ### Phase 3: Draft SKILL.md
 
-5. Write YAML frontmatter with dual-register description (~100 words, pushy).
+5. Write YAML frontmatter with dual-register description (~100 words, pushy, third person, states what AND when).
    - Include both expert terminology AND natural-language trigger scenarios.
    - Include explicit exclusions ("Do NOT use for...").
    - Be aggressive about triggering — current models undertrigger. Include synonyms, edge cases, and adjacent scenarios.
+   - Platform limits (Claude Code, 2026): description max 1024 characters. Combined description + `when_to_use` truncates at 1,536 characters inside a skill-listing budget of ~1% of the context window — least-used skills get dropped first, so don't rely on padding. Use `when_to_use` to extend the triggering surface beyond the description proper.
+   - Other useful frontmatter: `disable-model-invocation`, `user-invocable`, `allowed-tools`, `model`, `effort`, `context: fork` (runs the skill in a forked subagent), `paths` (glob-scoped activation). SKILL.md follows the Agent Skills open standard (agentskills.io) — custom slash commands have merged into skills.
 
 6. Write Expert Vocabulary Payload (15-30 terms in 3-5 clusters).
    - Place BEFORE behavioral instructions. WHY: vocabulary primes the routing signal before execution begins.
@@ -103,12 +113,14 @@ These are anti-patterns in the **skills this creator generates**. Scan every gen
    - Number every step. Use IF/THEN for branching logic.
    - Include WHY for non-obvious steps. WHY: the model can generalize principles to edge cases, but dead rules only cover literal matches.
    - Start with an anti-pattern scan step.
+   - Keep the body lean. Claude 4.5+/5 follows brief instructions reliably — enumerating every case and hedging every step is tuned for older, weaker models and can degrade output on current ones. When migrating a skill, test whether removing instructions improves the result before adding any.
+   - Never instruct the model to echo or transcribe its internal reasoning ("show your chain of thought," "explain your thinking step by step"). Ask for conclusions with brief stated rationale instead — on Claude Fable 5, reasoning-echo instructions can trigger the reasoning-extraction refusal classifier.
 
 9. Write Output Format specification.
    - Define required fields, structure, and templates.
    - Use structured formats (YAML, tables, numbered lists) over prose.
 
-10. Write 2-3 diverse Examples (BAD vs GOOD or input-to-output).
+10. Write 3-5 diverse Examples (BAD vs GOOD or input-to-output).
     - Cover different cases including at least one hard case.
     - Place the most representative example LAST. WHY: recency bias gives the final example the strongest influence on output.
 
@@ -133,7 +145,7 @@ These are anti-patterns in the **skills this creator generates**. Scan every gen
 ### Phase 6: Validate and Package
 
 15. Scan the generated SKILL.md against the Anti-Pattern Watchlist above. Fix any violations.
-16. IF subagents are available: test against 2-3 realistic prompts that a real user would type (casual, imprecise, no formal vocabulary).
+16. IF subagents are available: test against 3-5 realistic prompts that a real user would type (casual, imprecise, no formal vocabulary).
 17. Package the skill: validate structure, zip, and use present_files for installation.
 18. Save to `library/skills/` and update `index.json`.
 19. Log creation to `usage-log.jsonl`.
@@ -152,7 +164,7 @@ skill-name/
 ```
 
 SKILL.md internal structure (in this order):
-1. YAML frontmatter (name, description, metadata)
+1. YAML frontmatter (name, description, optional when_to_use/allowed-tools/model/effort/context/paths)
 2. Expert Vocabulary Payload
 3. Anti-Pattern Watchlist
 4. Behavioral Instructions
@@ -215,13 +227,13 @@ Precise terms organized in clusters. Named frameworks with originators. Routes t
 
 This skill uses Anthropic's native `.skill` packaging mechanism (validate, zip, present_files) for delivery. It does NOT invoke the built-in skill creator. It replaces the built-in approach with research-backed principles from the Forge synthesis:
 
-- Vocabulary routing (embedding space activation via precise terminology)
-- U-shaped attention optimization (front-load vocabulary, back-load retrieval anchors)
+- Vocabulary routing (precise terminology steers output away from the generic training-distribution center — "embedding cluster activation" is a useful working model here, not a proven mechanism)
+- U-shaped attention optimization (front-load vocabulary, back-load retrieval anchors; current frontier models show much smaller mid-context degradation than older benchmarks, but front/back positioning remains the safer default)
 - Negative constraint steering (anti-patterns push past the distribution center)
-- Progressive disclosure (three-level context loading)
-- Few-shot superiority (examples beat verbose instructions)
+- Progressive disclosure (three-level context loading; Claude Code truncates skill descriptions at 1,536 characters and retains only ~5K tokens per invoked skill after auto-compaction — front-load what matters)
+- Few-shot superiority (3-5 diverse examples beat verbose instructions; diminishing returns beyond that)
 
-See `./references/skill-principles.md` for the condensed research and `./references/skill-template.md` for an annotated gold-standard example.
+Numeric ranges throughout this skill (15-30 vocabulary terms, 3-5 clusters, 5-10 anti-patterns, ~100-word description, 8-15 trigger questions) are Forge design standards for coverage without dilution, not measured thresholds. The <500-line SKILL.md ceiling IS verified Anthropic guidance. See `./references/skill-principles.md` for the condensed research (with citations and bounds) and `./references/skill-template.md` for an annotated gold-standard example.
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: mission-planner
 description: |
-  Decomposes goals into team blueprints using evidence-based scaling laws, topology selection, and role design. Determines whether a goal needs a single agent or a coordinated team (3-5 agents max), selects the optimal communication topology (sequential pipeline, parallel-independent, centralized coordinator, hierarchical), and produces structured blueprints with artifact chains and quality gates.
+  Decomposes goals into team blueprints using evidence-based scaling laws, topology selection, and role design. Determines whether a goal needs a single agent or a coordinated team (3-4 agents recommended, 5 max), selects the optimal communication topology (sequential pipeline, parallel-independent, centralized coordinator, hierarchical), and produces structured blueprints with artifact chains and quality gates.
 
   Use this skill when the user wants to build something, plan a project, assemble a team, figure out what roles they need, break down a complex goal, or asks "how should I approach [X]?" — even if they don't mention agents or teams. Also triggers on specific domains: "build a SaaS," "marketing campaign," "security audit," "write a book," "launch a product."
 
@@ -19,7 +19,7 @@ The entry point and brain of the Forge system. Analyzes user goals, assesses com
 **Decomposition & Planning:** decision decomposition, value stream mapping, work breakdown structure, vertical slice, task decomposability, blast radius, two-way door decision
 **Coordination & Topology:** communication topology, topology selection, centralized coordination, decentralized coordination, pipeline architecture, sequential dependency, coordination overhead
 **Team Design:** RACI matrix, Conway's Law, artifact chain, quality gate, handoff artifact, role boundary, capability matching
-**Scaling & Efficiency:** tool density, capability saturation, error amplification, cost multiplier, efficiency ratio, cascade pattern, 45% threshold
+**Scaling & Efficiency:** tool density, capability saturation, error amplification, coordination overhead, baseline paradox (45% threshold), compute-matched comparison, cascade pattern
 
 ---
 
@@ -27,8 +27,8 @@ The entry point and brain of the Forge system. Analyzes user goals, assesses com
 
 ### Premature Multi-Agent
 - **Detection:** Goal can be stated in one sentence with no parallel workstreams. No genuinely different expertise required across subtasks.
-- **Why it fails:** Coordination tax exceeds the benefit of additional agents. A 3-agent team costs 3.5x tokens for 2.3x output.
-- **Resolution:** Try Level 0 first. Only escalate when single agent demonstrably fails the task.
+- **Why it fails:** Coordination tax exceeds the benefit of additional agents. Teams run at a 2-6x efficiency penalty versus a single agent, and tasks a capable single agent already handles show *negative* returns from added agents (Kim et al. 2025).
+- **Resolution:** Try Level 0 first. Only escalate when a single agent demonstrably fails the task at comparable effort.
 
 ### Role Overlap
 - **Detection:** Two agents have overlapping deliverables. Decision authority is ambiguous — both agents could make the same call.
@@ -37,8 +37,8 @@ The entry point and brain of the Forge system. Analyzes user goals, assesses com
 
 ### Missing Verification
 - **Detection:** Artifact chain has no review step. Artifacts flow downstream without acceptance criteria.
-- **Why it fails:** Enables error cascading — mistakes in early artifacts propagate and amplify through the chain. MetaGPT found structured handoffs reduce errors by ~40%, but only when verified.
-- **Resolution:** Add a quality gate at every critical handoff. Define specific acceptance criteria, not just "review."
+- **Why it fails:** Enables error cascading — mistakes in early artifacts propagate and amplify through the chain (unintegrated teams amplified errors 17.2x vs 4.4x with a central integrator; verification failures account for ~21% of multi-agent failures in MAST).
+- **Resolution:** Add a quality gate at every critical handoff. Define specific acceptance criteria, not just "review." Use a fresh-context verifier, not self-review.
 
 ### Sequential-Parallel Mismatch
 - **Detection:** Parallel topology assigned to a task where each step depends on the previous output. Agents block waiting for upstream artifacts.
@@ -52,8 +52,8 @@ The entry point and brain of the Forge system. Analyzes user goals, assesses com
 
 ### Agent Bloat
 - **Detection:** Team has more than 5 roles. Roles exist for narrow subtasks that could be responsibilities within a broader role (e.g., separate "formatter," "namer," "documenter" agents).
-- **Why it fails:** At 7+ agents, performance typically degrades. Communication channels scale as N*(N-1)/2 — at 7 agents that is 21 channels.
-- **Resolution:** Merge adjacent roles. Target 3-5 agents. Every agent must bring genuinely different expertise. The "would a real company hire a separate person for this?" test.
+- **Why it fails:** Under fixed budgets, per-agent reasoning capacity becomes prohibitively thin beyond 3-4 agents (Kim et al. 2025), and communication channels scale as N*(N-1)/2 — at 7 agents that is 21 channels. Homogeneous roles saturate fastest.
+- **Resolution:** Merge adjacent roles. Recommend 3-4 agents; never exceed the 5-agent cap. Every agent must bring genuinely different expertise. The "would a real company hire a separate person for this?" test.
 
 ---
 
@@ -79,7 +79,7 @@ The entry point and brain of the Forge system. Analyzes user goals, assesses com
    Identify: project archetype (product build, campaign, audit, content creation, research, operations).
    OUTPUT: Domain and archetype classification.
 
-4. Evaluate complexity using DeepMind criteria.
+4. Evaluate complexity using task-structure criteria (Kim et al. 2025 — see ./references/scaling-laws.md).
    a. **Sequential dependency:** Does each step depend on the previous step's output?
       - High sequential dependency → favors single agent or sequential pipeline.
       - Low sequential dependency → parallel topology viable.
@@ -110,7 +110,7 @@ The entry point and brain of the Forge system. Analyzes user goals, assesses com
    a. Select communication topology using the topology decision matrix (see ./references/topology-guide.md).
    b. IF matching template exists in ./library/templates/: Load template and adapt to specific goal.
    c. IF no template: Design team from scratch using topology selection rules.
-   d. Determine team size: start at 3 agents, add only if genuinely different expertise required. Never exceed 5 without explicit justification.
+   d. Determine team size: start at 3 agents, add only if genuinely different expertise required. Recommend 3-4; 5 is the hard cap and requires explicit justification in the blueprint.
    e. Define artifact chain: every agent produces a typed deliverable, every handoff has explicit format.
    f. Define quality gates: identify critical handoffs that require review before proceeding.
    g. Present blueprint to user following ./schemas/team-blueprint.md format.
@@ -167,7 +167,7 @@ Every blueprint includes:
 **BAD response:**
 Creates a 5-agent team: Content Strategist, Information Architect, Frontend Developer, Backend Developer, QA Engineer. Massive coordination overhead for a straightforward task.
 
-**Why it is bad:** A blog is a well-understood, low-complexity project. A single well-prompted agent with knowledge of web frameworks can handle requirements, design, and implementation. The 45% threshold tells us a single agent covers this easily. Five agents would cost 7x tokens for marginal improvement.
+**Why it is bad:** A blog is a well-understood, low-complexity project. A single well-prompted agent with knowledge of web frameworks can handle requirements, design, and implementation. This is squarely in the regime where added agents yield *negative* returns (the 45% baseline paradox, Kim et al. 2025) — a five-agent team would pay a several-fold token cost for degraded coherence.
 
 **GOOD response:**
 ```yaml
@@ -246,7 +246,7 @@ This skill activates when the user asks any of the following (or variations):
 
 ## References
 
-- `./references/scaling-laws.md` — DeepMind scaling criteria, 45% threshold, cost multipliers
+- `./references/scaling-laws.md` — Scaling evidence (Kim et al. 2025), 45% baseline paradox, real cost economics, team-size standard
 - `./references/topology-guide.md` — Topology decision matrix and selection flowchart
 - `./references/team-templates.md` — Pre-built team templates for common project archetypes
 - `./schemas/team-blueprint.md` — Output format specification

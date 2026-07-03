@@ -36,13 +36,13 @@ The pattern is consistent: generic terms route to surface-level advice; expert t
 
 LLMs were trained on millions of documents written by real product managers, real architects, and real engineers -- job postings, internal docs, technical blogs, conference talks, books. When you say "you are a senior site reliability engineer," you activate that entire cluster of SRE knowledge: incident response, SLOs, capacity planning, toil reduction. When you say "you are a synergy optimization specialist," you activate nothing useful because that role does not exist in the training data.
 
-Three rules from PRISM research make this concrete:
+Three practices, each grounded differently:
 
-1. **Keep it short.** Role assignments under 50 tokens produce the best outputs. Longer persona descriptions actually degrade accuracy -- the model spends attention processing the persona instead of the task.
+1. **Keep it short.** Forge keeps role identities to roughly 20-50 tokens. Persona research (Hu, Rostami & Thomason 2026, "Expert Personas Improve LLM Alignment but Damage Accuracy") found that knowledge-task accuracy degrades *more* as personas get longer -- but there's no published "optimal token count." The 20-50 token range is a Forge design standard for context economy, not a measured threshold.
 
-2. **Use real job titles.** "Senior site reliability engineer" outperforms "expert in keeping systems running." Real titles that exist in real organizations have dense representation in training data.
+2. **Use real job titles.** "Senior site reliability engineer" reads as an unambiguous scope descriptor and maps cleanly to real-world deliverables and decision boundaries. No study shows real titles outperform invented personas on accuracy -- Forge keeps them as a design standard for clarity, not a capability lever.
 
-3. **Never use flattery.** "You are the world's best programmer" performs worse than "You are a software engineer." Superlatives activate motivational and marketing text patterns, not domain expertise.
+3. **Never use flattery.** "You are the world's best programmer" spends tokens claiming quality instead of defining behavior. This is a Forge style convention, not a research finding -- no study isolates flattery's effect on accuracy inside personas.
 
 A good agent identity looks like this:
 
@@ -58,9 +58,9 @@ The second version wastes tokens on flattery and provides no organizational cont
 
 ## 3. When to Use Teams vs Single Agents
 
-DeepMind's 2025 multi-agent scaling research gives us hard numbers. Here is what they found, translated into decision rules.
+Kim et al., "Towards a Science of Scaling Agent Systems" (arXiv:2512.08296, Google Research/MIT), gives us the best current numbers on multi-agent scaling. Here is what they found, translated into decision rules.
 
-**The 45% rule.** If a single well-prompted agent gets you more than 45% of the way to a good result, adding more agents has diminishing returns. The coordination overhead -- composing messages, parsing handoffs, maintaining shared state -- eats into what extra agents contribute. This means: always try one agent first. Only add more when one agent demonstrably cannot do the job.
+**The ~45% accuracy rule.** Tasks where a single agent already clears roughly 45% accuracy see negative returns from adding more agents (coordination coefficient β = -0.408, p < 0.001). The single agent already covers the accessible part of the problem; extra agents mostly add coordination overhead. This means: always try one agent first. Only add more when one agent demonstrably cannot do the job.
 
 **The three questions to ask before building a team:**
 
@@ -68,22 +68,13 @@ DeepMind's 2025 multi-agent scaling research gives us hard numbers. Here is what
 2. **Tool density:** Does the task involve heavy file I/O, web search, or code execution? If yes, a single agent is usually better. Coordinating tool use across agents adds more overhead than it saves.
 3. **Can one agent handle it?** Seriously, can it? Try it before you assume it cannot.
 
-**The hard ceiling: 3-5 agents.** Performance peaks at around 4 agents for complex tasks. Beyond 5, coordination overhead eats the gains. At 7+, adding agents typically makes things worse. The numbers tell the story:
-
-| Team Size | Token Cost | Effective Output | Efficiency |
-|---|---|---|---|
-| 1 agent | 1.0x | 1.0x | 1.00 |
-| 3 agents | 3.5x | 2.3x | 0.66 |
-| 5 agents | 7.0x | 3.1x | 0.44 |
-| 7+ agents | 12.0x+ | 3.0x or less | < 0.25 |
-
-A 3-agent team costs 3.5 times as much as a single agent but only produces 2.3 times the output. At 7+ agents you pay 12 times as much and get less output than a 4-agent team.
+**Team size: 3-4 recommended, 5 hard cap.** This is a Forge design standard, not a measured universal optimum -- but it is informed by real numbers. Turn count grows superlinearly with team size (T = 2.72·(n+0.5)^1.724, R² = 0.974), and under a fixed compute budget, per-agent reasoning capacity becomes "prohibitively thin beyond 3-4 agents" (Kim et al.). Multi-agent teams also carry a real efficiency penalty -- a single-agent efficiency coefficient of 0.466 versus 0.074-0.234 for multi-agent architectures, a **2-6x efficiency penalty**. For comparison, Anthropic's own orchestrator-worker research system beat single-agent Claude by 90.2% on a breadth-first research eval, but consumed **~15x the tokens** of a single chat interaction (Anthropic, "How We Built Our Multi-Agent Research System," 2025).
 
 **When teams help:**
 - Subtasks can run in parallel (e.g., three independent analyses merged by a coordinator)
 - Subtasks require genuinely different domain expertise (not just different steps by the same role)
 - Handoffs between agents are structured artifacts with defined formats
-- The project scope justifies the 3-5x cost multiplier
+- The project scope justifies the 2-6x efficiency penalty (or ~15x token spend for research-style orchestration)
 
 **When teams hurt:**
 - The task requires sequential reasoning where each thought depends on the last
@@ -91,7 +82,7 @@ A 3-agent team costs 3.5 times as much as a single agent but only produces 2.3 t
 - The goal is simple enough for one well-prompted agent
 - You are adding agents "just in case" without evidence that one agent failed
 
-**The cascade rule:** Start at Level 0 (single agent). Escalate to Level 1 (agent + tools). Then Level 2 (worker + reviewer). Only reach for Level 3 (team of 3-5) when previous levels demonstrably failed. Never skip levels.
+**The cascade rule:** Start at Level 0 (single agent). Escalate to Level 1 (agent + tools). Then Level 2 (worker + reviewer). Only reach for Level 3 (team of 3-4, 5 max) when previous levels demonstrably failed. Never skip levels.
 
 ---
 
@@ -117,7 +108,7 @@ The result is a library that gets better over time -- frequently used items get 
 
 ## 5. How Artifact Chains Work
 
-MetaGPT's research (Hong et al., 2023) showed that agent teams communicating through structured artifacts outperform teams using free-form dialogue. Structured handoffs reduced error propagation by roughly 40%.
+MetaGPT's research (Hong et al., 2023) showed that agent teams communicating through structured artifacts outperform teams using free-form dialogue: executability scored 3.75 vs. 2.25 for dialogue-based ChatDev, with roughly 3x fewer human revisions needed.
 
 The reason is straightforward. When agents talk to each other in free-form text, ambiguity compounds at every step. Agent B misinterprets something Agent A said. Agent C misinterprets Agent B's misinterpretation. By the end of the chain, the output has drifted far from the intent.
 
@@ -189,15 +180,14 @@ When in doubt, start with one agent. The 45% threshold means it will handle more
 
 | What | Number | Why It Matters |
 |---|---|---|
-| Optimal persona length | < 50 tokens | Longer descriptions degrade accuracy |
+| Role identity length | ~20-50 tokens | Forge convention -- knowledge-task accuracy degrades as personas get longer (PRISM) |
 | Vocabulary terms per agent | 15-30 | Enough to define expertise, not enough to fragment attention |
 | Vocabulary clusters per agent | 3-5 | Each cluster activates a distinct sub-domain |
-| Optimal team size | 3-5 agents | Peak capability for complex decomposable tasks |
-| Saturation point | 4 agents | Beyond this, gains are marginal |
-| Single-agent sufficiency | > 45% of optimal | If one agent gets this far, adding more has diminishing returns |
-| Error reduction from structured handoffs | ~40% | Compared to free-form dialogue between agents |
-| Adaptive vs static team performance | +15-25% | Selecting agents per-task beats fixed teams |
+| Recommended team size / hard cap | 3-4 / 5 | Forge design standard -- turn count grows superlinearly beyond this (Kim et al.) |
+| Single-agent sufficiency | ~45% accuracy | Above this, adding agents shows negative returns (Kim et al.) |
+| Structured artifacts vs. dialogue | 3.75 vs 2.25 executability, ~3x fewer revisions | MetaGPT vs. dialogue-based ChatDev (Hong et al. 2023) |
+| Adaptive team assembly vs. static baselines | +21.94% | CaptainAgent vs. existing multi-agent baselines (Song et al. 2024) |
 
 ---
 
-*Based on research from DeepMind (2025), MetaGPT (Hong et al., 2023), PRISM, Captain Agent (2024), and vocabulary routing analysis. See /research for source material.*
+*Based on research from Kim et al. (2025, arXiv:2512.08296, Google Research/MIT), MetaGPT (Hong et al., 2023), PRISM (Hu, Rostami & Thomason 2026), CaptainAgent (Song et al. 2024), and vocabulary routing analysis. See /research for source material.*

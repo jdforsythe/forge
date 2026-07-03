@@ -37,7 +37,7 @@ You are a product manager responsible for defining product requirements, priorit
 > - **Reporting line:** "VP of Product" establishes authority boundary — this is a mid-level IC, not a VP.
 > - **Collaborators:** Four named roles establish the interaction surface.
 > - **No flattery:** No "expert," "world-class," or "passionate." Defined by what they do, not how good they are.
-> - **Under 50 tokens:** At 38 tokens, well within PRISM optimal range.
+> - **Under 50 tokens:** At 38 tokens, well within the Forge ~20-50-token convention.
 
 ---
 
@@ -50,7 +50,7 @@ You are a product manager responsible for defining product requirements, priorit
 
 > **Annotation — Vocabulary Payload (27 terms in 4 clusters):**
 > - **15-year practitioner test:** Every term is something a senior PM would say to another senior PM. "RICE prioritization" yes. "Best practices for prioritization" no.
-> - **Attribution:** Key frameworks attributed — RICE (Intercom), JTBD (Christensen), story mapping (Patton), INVEST (Wake), North Star (Ellis). This strengthens knowledge cluster activation.
+> - **Attribution:** Key frameworks attributed — RICE (Intercom), JTBD (Christensen), story mapping (Patton), INVEST (Wake), North Star (Ellis). This disambiguates the term and anchors the intended meaning — a precision practice, not a measured activation effect.
 > - **Cluster organization:** Four clusters map to the PM workflow — discover, build, measure, communicate. A real PM's work follows this cycle.
 > - **No consultant-speak:** Zero instances of "leverage," "synergy," "best practices," "thought leadership."
 > - **Specificity:** "retention cohort analysis" not "track retention." "A/B test design" not "experiment with features." "Now/Next/Later format" not "share the roadmap."
@@ -83,8 +83,8 @@ You are a product manager responsible for defining product requirements, priorit
 > **Annotation — Decision Authority:**
 > - **Autonomous decisions are specific:** Not "product decisions" but exactly which product decisions — prioritization, acceptance criteria, metrics. Someone can audit whether the PM stayed in bounds.
 > - **Escalation triggers are concrete:** Not "if unsure" but specific categories — roadmap changes, pricing, new infrastructure. These are checkable conditions.
-> - **Out of scope is explicit:** Five areas this PM does NOT touch. This prevents FM-2.3 Role Confusion. The PM does not make architecture decisions (that is the architect). The PM does not make design decisions (that is the designer).
-> - **No overlap:** In a team with an architect and designer, these boundaries are clean. The PM defines WHAT to build. The architect decides HOW to build it. The designer decides how it LOOKS and WORKS.
+> - **Out of scope is explicit:** Five areas this PM does NOT touch — the PM does not make architecture decisions (that is the architect) or design decisions (that is the designer).
+> - **No overlap:** In a team with an architect and designer, these boundaries are clean. The PM defines WHAT to build. The architect decides HOW to build it. The designer decides how it LOOKS and WORKS. This prevents Role Overlap (Forge watchlist W-2; nearest MAST analog FM-1.2 Disobey Role Specification).
 
 ---
 
@@ -155,7 +155,7 @@ You are a product manager responsible for defining product requirements, priorit
 - **Why it fails:** Uncontrolled scope growth delays delivery and dilutes the feature's measurable impact.
 - **Resolution:** Any addition during implementation requires either rejection or a separate PRD (SOP Step 6). Original scope is immutable once approved.
 
-### Rubber-Stamp PRD Review (MAST FM-3.1)
+### Rubber-Stamp PRD Review (Forge watchlist W-1; nearest MAST analogs FM-3.2/3.3)
 - **Detection:** Engineering and design reviews approve the PRD with no questions or concerns. Review completes in under 5 minutes for a multi-week feature.
 - **Why it fails:** Sycophantic or disengaged review misses technical and UX issues. Problems surface during implementation when they are expensive to fix.
 - **Resolution:** Reviewers must identify at least one concern or explicitly justify "no concerns" with specific evidence. If review produces zero questions, the PM should probe with "What is the riskiest assumption in this PRD?"
@@ -166,10 +166,10 @@ You are a product manager responsible for defining product requirements, priorit
 - **Resolution:** Metrics must be leading indicators of business value. Feature Success Report (SOP Step 7) is mandatory, not optional.
 
 > **Annotation — Anti-Patterns:**
-> - **Named patterns:** Each has a recognizable name, some from established literature (Feature Factory from Cagan, MAST FM-3.1).
+> - **Named patterns:** Each has a recognizable name, some from established literature (Feature Factory from Cagan, Rubber-Stamp Review from the Forge watchlist).
 > - **Observable detection:** Signals are things you can see in the output — missing sections, absent scores, short review times. Not subjective ("seems superficial").
 > - **Concrete resolution:** Every pattern has a specific action. "Require RICE scoring" not "be more data-driven."
-> - **6 patterns:** Within the 5-10 range. Mix of role-specific (Feature Factory, HiPPO) and general (Rubber-Stamp from MAST).
+> - **6 patterns:** Within the 5-10 range. Mix of role-specific (Feature Factory, HiPPO) and general (Rubber-Stamp Review from the Forge watchlist).
 
 ---
 
@@ -196,7 +196,7 @@ You are a product manager responsible for defining product requirements, priorit
 
 This agent definition succeeds because:
 
-1. **Identity is brief (38 tokens)** — within PRISM optimal range, no accuracy tax.
+1. **Identity is brief (38 tokens)** — within the Forge ~20-50-token convention, keeping the accuracy tax of a persona as small as the tradeoff allows.
 2. **No flattery** — defined by responsibility and context, not quality claims.
 3. **Vocabulary is precise (27 terms)** — every term passes the 15-year practitioner test, with attributions.
 4. **Deliverables are verifiable** — named artifacts with sections and lengths.

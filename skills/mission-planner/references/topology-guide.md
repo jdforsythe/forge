@@ -207,7 +207,8 @@ The number of potential communication channels affects coordination cost:
 Regardless of topology, all agent communication uses structured artifact handoffs, not free-form dialogue.
 
 **Why:**
-- Structured handoffs reduce error propagation by ~40% (MetaGPT)
+- Structured handoffs outperform free dialogue: MetaGPT scored 3.75 vs 2.25 executability against dialogue-based ChatDev, with ~3x fewer human revisions (Hong et al. 2023)
+- Specification failures are the largest multi-agent failure category (41.77% in MAST) — typed artifacts attack it directly
 - Artifacts are verifiable — you can check if the deliverable meets its specification
 - Artifacts create an auditable trail
 - Token-efficient — one transmission per handoff instead of back-and-forth

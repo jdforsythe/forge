@@ -31,7 +31,7 @@ Start with one. A single well-defined agent handles most tasks better than a poo
 - A single agent's context window cannot hold all the relevant information
 - Sequential handoff improves quality (e.g., write then review)
 
-For most projects, 2-3 agents is the sweet spot. The maximum recommended is 5. Beyond that, coordination overhead outweighs the benefits.
+For most projects, 3-4 agents is the sweet spot. The maximum recommended is 5. Beyond that, coordination overhead outweighs the benefits.
 
 ## What if my domain is not in the library?
 

@@ -31,7 +31,7 @@ Team templates tell the Mission Planner how to staff a project. Every template f
      "agent_count": 4
    }
    ```
-4. Keep `agent_count` between 3 and 5. Exceeding 5 agents requires explicit justification in the topology rationale.
+4. Keep `agent_count` at 3-4 agents (recommended), 5 max. Exceeding 5 agents requires explicit justification in the topology rationale.
 
 ---
 

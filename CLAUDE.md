@@ -17,7 +17,7 @@ An open-source system for science-backed AI team assembly.
 
 ## Key Principles
 - Start simple, add complexity only when demonstrated need requires it
-- Vocabulary routing is the primary quality lever
-- Real-world roles activate real expertise
-- 3-5 agents maximum per team
+- Vocabulary routing is the primary generative-quality lever
+- Real-world roles define scope, register, and decision boundaries
+- 3-4 agents recommended, 5 maximum per team
 - Structured artifacts for handoffs, not free-form dialogue

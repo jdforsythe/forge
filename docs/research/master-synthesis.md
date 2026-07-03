@@ -15,7 +15,9 @@ This document is structured as a reference for an agent that will create skills.
 4. **The Architecture** — How to structure a skill file for maximum effectiveness
 5. **The Evaluation** — How to test and iterate
 
-Every principle is grounded in either peer-reviewed research, Anthropic's own engineering documentation, or documented practitioner evidence.
+Every principle is grounded in either peer-reviewed research, Anthropic's own engineering documentation, or documented practitioner evidence. Where Forge uses a specific number that no source states (term counts, iteration caps), it is labeled a **Forge design standard**.
+
+> **Evidence baseline:** July 2026, targeting the Claude 4.5+/5 model generation (Fable 5, Opus 4.8, Sonnet 5, Haiku 4.5). Every citation in this document was verified against its live source in the July 2026 red-team audit. Model-behavior findings measured on older generations are marked with caveats where current-generation behavior differs.
 
 ---
 
@@ -31,11 +33,11 @@ Understanding the transformer architecture explains *why* specific prompting str
 
 **The takeaway:** Good skill design is fundamentally about maximizing signal-to-noise ratio in the tokens you put into context. More tokens ≠ better results. The right tokens = better results.
 
-*Sources: Vaswani et al., "Attention Is All You Need" (2017); Anthropic, "Effective Context Engineering for AI Agents" (Sep 2025); Chroma Research, "Context Rot" (2024)*
+*Sources: Vaswani et al., "Attention Is All You Need" (2017); Anthropic, "Effective Context Engineering for AI Agents" (Sep 2025); Chroma Research, "Context Rot" (Jul 2025)*
 
 ### 1.2 The U-Shaped Attention Curve ("Lost in the Middle")
 
-**How it works:** LLMs exhibit a well-documented positional bias: tokens at the beginning and end of the context receive disproportionately strong attention, while tokens in the middle receive less. This creates a U-shaped attention curve. Liu et al. (2024) measured 30%+ accuracy drops on multi-document QA when the answer document was in the middle of context versus at position 1 or 20. MIT researchers (Wu et al., 2025) traced this to architectural causes: causal masking and Rotary Position Embedding (RoPE) create inherent decay toward middle positions.
+**How it works:** LLMs exhibit a well-documented positional bias: tokens at the beginning and end of the context receive disproportionately strong attention, while tokens in the middle receive less. This creates a U-shaped attention curve. Liu et al. (2024) measured drops of more than 20 percentage points on multi-document QA when the answer document was mid-context versus at the start — on GPT-3.5-era models; current frontier models show much smaller (but nonzero) mid-context degradation, with primacy bias persisting (Chroma, 2025). MIT researchers (Wu et al., 2025) traced this to architectural causes: causal masking and Rotary Position Embedding (RoPE) create inherent decay toward middle positions.
 
 **Why it matters for skills:** The position of information within a skill definition affects how strongly the model attends to it. Critical instructions placed in the middle of a long skill file will receive less attention than those at the beginning or end.
 
@@ -49,13 +51,15 @@ Understanding the transformer architecture explains *why* specific prompting str
 
 ### 1.3 Vocabulary as a Routing Signal in Embedding Space
 
-**How it works:** LLMs are trained on massive corpora where expert content and shallow content coexist. Expert content uses precise terminology; shallow content uses generic terms. When the model encounters specific vocabulary in the prompt, it activates knowledge clusters near that vocabulary in its learned embedding space. "OKLCH tinted neutrals" routes to color science papers and design system docs. "Nice colors" routes to blog posts and casual tutorials.
+**How it works:** LLMs are trained on massive corpora where expert content and shallow content coexist. Expert content uses precise terminology; shallow content uses generic terms. Safe, generic choices dominate training data, so unguided sampling converges on them — Anthropic calls this distributional convergence ("Improving frontend design through Skills," Nov 2025). Specific vocabulary steers output away from that center: "OKLCH tinted neutrals" sets an expert design register; "nice colors" sets a casual-tutorial register. (The popular "activates knowledge clusters in embedding space" story is a useful working model, not a published finding — treat it as a mental model, not a mechanism.)
 
-**Why it matters for skills:** The vocabulary in a skill definition determines which "region" of the model's learned knowledge gets activated. This isn't metaphorical — it's a direct consequence of how embeddings and attention work. The prompt vocabulary acts as a query into the model's distributed knowledge, and precise queries retrieve precise knowledge.
+**Why it matters for skills:** The vocabulary in a skill definition sets the register, style, and domain framing of what the model generates. Anthropic's frontend-design work showed targeted vocabulary plus explicit avoid-lists immediately improves generative output — the model has latent expert capability that default sampling doesn't express.
 
-**The takeaway:** Skills must contain the exact terminology that domain experts use. This is the single highest-leverage intervention in skill quality. The model already knows how to do most things at an expert level — it just needs the right vocabulary to route to that knowledge.
+**Two bounds:** (1) The effect is demonstrated for *generative/stylistic* quality, not factual accuracy — use verification, not vocabulary, for correctness. (2) Specificity has a sweet spot: Schreiter (2025) found an optimal *mid-range* of terminology specificity across domains — peer-register precision wins; maximal jargon does not.
 
-*Sources: Ranjan et al. (2024), "One Word Is Not Enough"; IBM Prompt Engineering documentation; Paul Bakaus / Impeccable project (2026); Anthropic frontend-design skill*
+**The takeaway:** Skills must contain the exact terminology that domain experts use with peers. This remains the highest-leverage intervention for output quality in generative domains.
+
+*Sources: Anthropic, "Improving frontend design through Skills" (Nov 2025); Schreiter (2025), arXiv:2505.17037; Paul Bakaus / Impeccable project (2026); Zhou et al., MASS (ICLR 2026)*
 
 ### 1.4 Why Negative Constraints Push Past the Distribution Center
 
@@ -63,7 +67,7 @@ Understanding the transformer architecture explains *why* specific prompting str
 
 **Why it matters for skills:** Without explicit anti-patterns and negative examples, the model will produce the most average version of whatever you asked for. Anti-patterns are not just guardrails — they are steering mechanisms that force the model into more distinctive output space.
 
-**Research nuance:** The CHI 2023 paper "Why Johnny Can't Prompt" found that non-experts overwhelmingly use "Do not X" phrasing, which is less effective than "Do Y instead." However, for system prompts and skill definitions (not user-facing conversation), combining positive instruction with negative constraint is most effective. Anthropic's own prompting docs recommend "using positive and negative examples" together.
+**Research nuance:** The CHI 2023 paper "Why Johnny Can't Prompt" observed (in a 10-participant qualitative study) that non-experts much more commonly use "Do not X" phrasing, and that interviewers found it less effective than "Do Y instead." However, for system prompts and skill definitions (not user-facing conversation), combining positive instruction with negative constraint is most effective. Anthropic's own prompting docs recommend "using positive and negative examples" together.
 
 **The takeaway:** Every skill needs both: what TO do (positive instruction with expert vocabulary) and what NOT to do (named anti-patterns with specific alternatives). Negative constraints alone are weak. Positive + negative together are strongest.
 
@@ -71,31 +75,32 @@ Understanding the transformer architecture explains *why* specific prompting str
 
 ### 1.5 Why Few-Shot Examples Beat Verbose Instructions
 
-**How it works:** LLMs are fundamentally pattern-matching engines trained on sequence prediction. When shown input→output examples, the model can pattern-match against the demonstrated structure far more reliably than it can follow complex verbal rules. Research consistently shows that 2-3 well-chosen examples outperform paragraphs of instructions for most tasks.
+**How it works:** LLMs are fundamentally pattern-matching engines trained on sequence prediction. When shown input→output examples, the model can pattern-match against the demonstrated structure far more reliably than it can follow complex verbal rules. Anthropic's current docs call examples "one of the most reliable ways to steer Claude's output format, tone, and structure" and recommend 3-5 diverse examples.
 
 **Key findings from research:**
-- LangChain experiments (2024) found that even naive few-shotting improves tool-calling performance, and 3 examples often match 9 in effectiveness (diminishing returns)
-- The "few-shot dilemma" (2025) found that excessive examples can actually degrade performance in smaller models due to context overflow, but frontier models handle it well
-- Example format matters as much as content — how you structure the input→output pairs affects performance differently per model
-- Recency bias: LLMs weight the last example more heavily, so place the most representative example last
+- LangChain experiments (2024) found that even naive few-shotting improves tool-calling performance, and on their benchmark 3 examples usually matched 9 in effectiveness (diminishing returns; gains varied significantly by model)
+- The few-shot dilemma (Tang et al. 2025, arXiv:2509.13196) found excessive examples degrade smaller (~≤8B) models due to limited long-context comprehension, while frontier models stay stable
+- Example format matters as much as content — how you structure the input→output pairs affects performance differently per model (message-formatted beat string-formatted, with Claude gaining most, in LangChain's tests)
+- Recency bias: LLMs weight content near the end of the prompt more heavily (Zhao et al., "Calibrate Before Use," ICML 2021) — placing the most representative example last is a practitioner exploitation heuristic built on that finding
+- Reasoning-model counterpoint: for reasoning-heavy tasks, zero-shot is the right default — misaligned examples can actively degrade reasoning models (DeepSeek-R1 report, 2025; OpenAI reasoning best practices)
 
-**The takeaway:** Skills should include 2-3 diverse, canonical examples showing input→output pairs. These examples communicate implicit quality expectations more effectively than any amount of verbal instruction. Don't stuff edge cases — show the pattern, then let the model generalize.
+**The takeaway:** Skills should include 3-5 diverse, canonical examples showing input→output pairs — for format, tone, and structure steering. These examples communicate implicit quality expectations more effectively than any amount of verbal instruction. Don't stuff edge cases — show the pattern, then let the model generalize. For pure reasoning tasks, try zero-shot first.
 
-*Sources: Anthropic, "Effective Context Engineering for AI Agents"; LangChain few-shot research (2024); Wei et al. (2022), Chain-of-Thought Prompting; Anthropic Claude 4 best practices*
+*Sources: Anthropic Claude prompting best practices (2026); LangChain few-shot research (2024); Tang et al. (2025), arXiv:2509.13196; Zhao et al. (ICML 2021), arXiv:2102.09690; DeepSeek-R1 (2025)*
 
 ### 1.6 Why Structure Reduces Ambiguity (XML Tags, Sections)
 
 **How it works:** Tokenization breaks text into subword units. When the model encounters unstructured prose, it must infer where instructions end and context begins, where one section stops and another starts. Structural markers (XML tags, Markdown headers, labeled sections) provide explicit boundaries that the model doesn't have to infer. XML tags provide multi-line certainty with delimiters that mark where items begin and end — tokenization can check whether a tag has been closed and when that particular item of context should be considered complete.
 
 **Key findings:**
-- Anthropic specifically recommends XML tags for structuring prompts: "Claude has been specifically tuned to pay special attention to your structure"
-- A comparative study found model performance can vary up to 40% based on prompt format alone
-- XML is the only structured format recommended by all three major providers (Anthropic, OpenAI, Google)
-- XML outperforms Markdown for complex prompts across most models, though it uses ~15% more tokens
+- Anthropic's current docs recommend XML tags to "parse complex prompts unambiguously" when mixing instructions, context, examples, and inputs — a structural-disambiguation recommendation, with no published quantitative XML-vs-Markdown number
+- He et al. (Microsoft, 2024, arXiv:2411.10541) found GPT-3.5-turbo's performance varied up to 40% on a code-translation task purely from prompt format (plain text/Markdown/YAML/JSON — XML was not tested); larger models (GPT-4) were substantially more robust, and no single format won universally
+- OpenAI's GPT-4.1 prompting guide reports both Markdown and XML performing well (JSON underperformed in long context) — format preference is model-dependent
+- No rigorous public XML-vs-Markdown benchmark exists for current Claude models; treat XML as Anthropic's recommended practice, not a benchmarked win
 
-**The takeaway:** Use XML tags or clear Markdown sections to delineate different parts of a skill definition. The exact format matters less than having clear delineation. For Claude specifically, XML tags are preferred. Separate: who the model is, what it should do, how to format output, and what not to do.
+**The takeaway:** Use XML tags or clear Markdown sections to delineate different parts of a skill definition. The exact format matters less than having clear delineation. For Claude specifically, XML tags are the documented recommendation. Separate: who the model is, what it should do, how to format output, and what not to do.
 
-*Sources: Anthropic Claude docs; Voyce (2025), comparative XML/Markdown study; Anthropic, "Effective Context Engineering for AI Agents"*
+*Sources: Anthropic Claude prompting docs (2026); He et al. (2024), arXiv:2411.10541; OpenAI GPT-4.1 prompting guide (2025); Anthropic, "Effective Context Engineering for AI Agents"*
 
 ### 1.7 Why Explaining "Why" Works Better Than Rules Alone
 
@@ -205,7 +210,7 @@ STRONG (dual register): "Facilitates architectural decision records using struct
 First you should check if there are any anti-patterns, and if so you should probably address them. Then try to figure out the decision tier if you can, but if it's not clear you might want to ask a question.
 ```
 
-### 2.5 DO: Include 2-3 Diverse, Canonical Examples
+### 2.5 DO: Include 3-5 Diverse, Canonical Examples
 
 **What:** Show input→output pairs that demonstrate the desired pattern, covering different cases including at least one hard case.
 
@@ -215,8 +220,8 @@ First you should check if there are any anti-patterns, and if so you should prob
 - Include examples as BAD vs GOOD pairs when showing quality standards
 - Include examples as input→output pairs when showing workflow
 - Cover diverse cases, not just the happy path
-- Place the most representative/important example last (recency bias)
-- 2-3 examples are the sweet spot; diminishing returns after that
+- Place the most representative/important example last (recency bias, Zhao et al. 2021 — an exploitation heuristic, not a tested prescription)
+- 3-5 examples per Anthropic's documented recommendation; diminishing returns beyond that (LangChain: 3 ≈ 9 on their benchmark)
 
 **Example of a quality-standard pair:**
 ```
@@ -296,7 +301,7 @@ ask for a 'dashboard.'"
 **How:**
 - "Use `var(--spacing-md)` for standard element gaps" — names the token (specific) without dictating where to apply it (flexible)
 - Start minimal, test, add detail only where the model fails
-- Elastic Agent Builder (2025) advises: "Begin with clarity — use unambiguous instructions. Only add granular logic if the model fails a specific use case during testing."
+- Elastic Agent Builder (2025) advises: "Begin with clarity: Use unambiguous instructions specific to your primary tasks. Only add granular, step-by-step logic if the model fails a specific use case during testing."
 
 ---
 
@@ -327,7 +332,7 @@ Each anti-pattern is listed with the mechanism that makes it fail.
 
 **What fails:** "You are a world-renowned expert who never makes mistakes and always provides the best advice."
 
-**Why it fails:** DigitalOcean's guide specifically notes that "heavy-handed role assignments may actually backfire by limiting helpfulness." Flattery-based personas don't activate different knowledge — they just add noise. The model's output quality is determined by the vocabulary and structure of the instructions, not by whether you called it "world-class."
+**Why it fails:** DigitalOcean's guide notes that "heavy-handed role assignments may actually backfire by limiting helpfulness." More fundamentally, controlled studies find personas shape alignment, tone, and scope — not factual capability — and expert personas can slightly *reduce* knowledge-task accuracy (Zheng et al. 2024; Hu et al. 2026; see docs/research/persona-science.md). The model's output quality is determined by the vocabulary and structure of the instructions, not by whether you called it "world-class."
 
 **Instead:** Define the persona through domain knowledge, frameworks, and behavioral constraints. "You are an engineering director experienced in delivering B2B SaaS products with small teams under deadline pressure" provides useful context. "You are the best engineering director in the world" does not.
 
@@ -369,7 +374,7 @@ Each anti-pattern is listed with the mechanism that makes it fail.
 
 **Why it works against you:** Anthropic's context engineering guide specifically warns against this: "teams will often stuff a laundry list of edge cases into a prompt in an attempt to articulate every possible rule the LLM should follow for a particular task. We do not recommend this." Edge case rules consume context, create conflicting constraints, and are less effective than diverse canonical examples.
 
-**Instead:** Curate 2-3 diverse, canonical examples that effectively portray the expected behavior. Include one or two hard cases among them. Let the model generalize from examples rather than memorizing rules.
+**Instead:** Curate 3-5 diverse, canonical examples that effectively portray the expected behavior. Include one or two hard cases among them. Let the model generalize from examples rather than memorizing rules.
 
 ### 3.9 DON'T: Use Paragraph-Form Instructions for Complex Behavior
 
@@ -386,6 +391,26 @@ Each anti-pattern is listed with the mechanism that makes it fail.
 **Why it fails:** Anthropic's tools guide: "If a human engineer can't definitively say which tool should be used in a given situation, an AI agent can't be expected to do better." Ambiguous skill boundaries lead to mis-triggers, non-triggers, or the wrong skill activating.
 
 **Instead:** Curate a minimal viable set of skills. When overlap exists, make the delineation explicit in descriptions. Include explicit exclusions ("Do NOT use this skill for...").
+
+### 3.11 DON'T: Over-Prescribe for Current-Generation Models
+
+**What fails:** Skills and agent definitions that enumerate every case, hedge every instruction, and pile on rules tuned for older, weaker models.
+
+**Why it fails:** Anthropic's Fable 5 prompting guide is explicit: instruction-following is now strong enough that "a brief instruction steers most behaviors," and skills developed for prior models are often too prescriptive — they can actively degrade output quality. Instruction-density research points the same way: adherence to individual requirements falls as more are packed into one prompt (What Prompts Don't Say, 2025; IFScale, 2025).
+
+**Instead:** State the goal, the boundaries, and the verification standard; let the model fill in competent defaults. When migrating a skill to a new model generation, test whether removing instructions improves output before adding any. Keep descriptions pushy (triggering is still the weak point) but keep bodies lean.
+
+*Sources: Anthropic, "Prompting Claude Fable 5" (2026); Yang et al. (2025), arXiv:2505.13360; Jaroslawicz et al. (2025), arXiv:2507.11538*
+
+### 3.12 DON'T: Instruct the Model to Echo Its Internal Reasoning
+
+**What fails:** Instructions like "show your chain of thought," "transcribe your reasoning process," or "explain your internal thinking step by step" in skills or agent definitions.
+
+**Why it fails:** Two reasons on current models. (1) Reasoning models already reason internally; manual chain-of-thought scaffolding adds negligible accuracy at real time/token cost (Meincke et al., 2025) and is a deprecated path in Anthropic's docs — adaptive thinking replaced it. (2) On Claude Fable 5, instructing the model to echo internal reasoning can trigger the reasoning-extraction refusal classifier, failing the request outright. Anthropic's migration guidance says to audit existing skills for show-your-thinking instructions.
+
+**Instead:** Ask for *conclusions with stated rationale* ("state the tier and explain why in one sentence") — a deliverable, not a transcript. Let thinking happen in the model's thinking channel.
+
+*Sources: Anthropic, "Prompting Claude Fable 5" (2026); Meincke et al. (2025), arXiv:2506.07142*
 
 ---
 
@@ -419,7 +444,7 @@ The order of sections within SKILL.md is not arbitrary. It's optimized for how t
 3. **Anti-Pattern Watchlist** — Detection signals and resolution steps. Appears BEFORE behavioral instructions so the model checks for patterns before proceeding.
 4. **Behavioral Instructions** — Ordered steps with imperative verbs and explicit conditions.
 5. **Output Format** — Templates, required fields, structure specifications.
-6. **Examples** — 2-3 BAD vs GOOD pairs or input→output demonstrations.
+6. **Examples** — 3-5 BAD vs GOOD pairs or input→output demonstrations.
 7. **Evaluation Criteria** — Weighted, phrased as gradable questions. May also live in references/.
 8. **Questions This Skill Answers** — 8-15 natural-language queries. Functions as retrieval anchors AND self-documentation AND test cases.
 
@@ -518,7 +543,7 @@ For every skill created, verify:
 - [ ] Counter-examples: at least 2 BAD vs GOOD output pairs
 
 ### Examples & Evaluation
-- [ ] 2-3 diverse canonical examples (input→output or BAD/GOOD pairs)
+- [ ] 3-5 diverse canonical examples (input→output or BAD/GOOD pairs)
 - [ ] Evaluation criteria defined, weighted, phrased as gradable questions
 - [ ] Deterministic verification step where applicable (build, lint, test)
 - [ ] Tested against 3-5 realistic colloquial prompts
@@ -543,10 +568,11 @@ For every skill created, verify:
 | Anthropic, "Effective Context Engineering for AI Agents" (Sep 2025) | Context as finite resource, attention budget, progressive disclosure, tool design, few-shot guidance |
 | Anthropic, "Building Effective Agents" (Dec 2024) | Agent definition, workflow vs agent, tool design principles |
 | Anthropic, "Harness Design for Long-Running Apps" (Mar 2026) | Separation of generation/evaluation, weighted eval criteria, initializer pattern |
-| Anthropic, "Effective Harnesses for Long-Running Agents" (Dec 2025) | Multi-context-window strategies, compaction, note-taking |
+| Anthropic, "Effective Harnesses for Long-Running Agents" (Nov 2025) | Multi-context-window strategies, compaction, note-taking |
 | Anthropic, "Writing Effective Tools for AI Agents" (Sep 2025) | Tool description design, minimal overlap, parameter naming |
-| Anthropic, "Prompting Best Practices" (Claude 4.6) | XML tags, long context handling, few-shot, thinking, agentic systems |
-| Anthropic, "Improving Frontend Design Through Skills" (Dec 2025) | Vocabulary gap as primary intervention, anti-pattern libraries |
+| Anthropic, "Claude Prompting Best Practices" (living doc, current for the Claude 5 family) | XML tags, long context handling, 3-5 examples, adaptive thinking, agentic systems |
+| Anthropic, "Prompting Claude Fable 5" (Jun 2026) | Brief instructions over enumeration; refactor over-prescriptive skills; verifier subagents; memory systems; reasoning-echo prohibition |
+| Anthropic, "Improving Frontend Design through Skills" (Nov 2025) | Distributional convergence; targeted design vocabulary + explicit avoid-lists delivered via a ~400-token skill |
 | Anthropic, Skill-Creator Skill Documentation | Canonical skill structure, progressive disclosure, triggering, testing |
 
 ### Primary Sources — Research Papers
@@ -554,15 +580,21 @@ For every skill created, verify:
 | Source | Key Contribution |
 |--------|-----------------|
 | Vaswani et al., "Attention Is All You Need" (2017) | Transformer architecture, self-attention mechanism |
-| Liu et al., "Lost in the Middle" (2024, TACL) | 30%+ accuracy drop for middle-positioned information |
-| Hsieh et al., "Found in the Middle" (2024, ACL) | U-shaped attention bias, calibration mechanism, up to 15% improvement |
+| Liu et al., "Lost in the Middle" (2024, TACL) | >20-point accuracy drop for middle-positioned information (GPT-3.5-era models) |
+| Hsieh et al., "Found in the Middle" (2024, Findings of ACL) | U-shaped attention bias, calibration mechanism, up to 15-percentage-point improvement |
 | Wu et al., "On the Emergence of Position Bias" (2025, MIT) | Causal masking and RoPE as architectural causes of position bias |
-| Ranjan et al., "One Word Is Not Enough" (2024) | Prompt formatting significantly affects embedding quality |
+| Ranjan, "One Word Is Not Enough" (2025) | Prompt formatting affects word-embedding quality (isolated-word similarity; not an LLM-prompting study) |
+| Schreiter, "How Prompt Vocabulary affects Domain Knowledge" (2025) | Optimal mid-range terminology specificity; maximal jargon does not win |
+| Zheng et al., "When 'A Helpful Assistant' Is Not Really Helpful" (EMNLP Findings 2024) | 162 personas: no factual-accuracy gain from personas in system prompts |
+| Hu et al., "Expert Personas Improve LLM Alignment but Damage Accuracy" (2026) | Alignment-accuracy tradeoff; longer personas damage knowledge tasks more |
+| He et al., "Does Prompt Formatting Have Any Impact on LLM Performance?" (2024) | Up to 40% format swing on GPT-3.5-turbo; larger models robust; no universal best format |
+| Zhao et al., "Calibrate Before Use" (ICML 2021) | Recency bias in few-shot prompting |
+| Tang et al., "The Few-shot Dilemma" (2025) | Over-prompting degrades small models; frontier models stable |
 | Wei et al., "Chain-of-Thought Prompting" (2022) | Step-by-step reasoning improves complex task performance |
 | Meincke et al., "Decreasing Value of CoT" (2025, Wharton) | CoT benefits diminish for reasoning models; CoT can increase variability |
 | "What Prompts Don't Say" (2025) | Adding more requirements doesn't improve performance; requirements-aware optimization |
 | Zamfirescu-Pereira et al., "Why Johnny Can't Prompt" (CHI 2023) | Non-experts prefer "Do not X" over "Do Y" despite the latter being more effective |
-| Chroma Research, "Context Rot" (2024) | Degradation of recall as context increases |
+| Chroma Research, "Context Rot" (Jul 2025) | Monotonic, non-uniform degradation of recall as context increases (18 frontier models); focused prompts beat full prompts |
 
 ### Practitioner Sources
 
