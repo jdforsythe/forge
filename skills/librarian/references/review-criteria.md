@@ -142,6 +142,44 @@ The Librarian does not automatically demote items. If an item at "tested" or hig
 
 ---
 
+## Evidence Currency Criteria
+
+### Evidence Baseline
+
+Evidence baseline: July 2026, targeting Claude 4.5+/5. Items citing research must trace to `docs/research/source-index.md`; quantitative claims must appear in their cited source; model-behavior guidance older than ~18 months needs re-confirmation against current-generation evidence or an explicit "Forge design standard" label.
+
+Apply this criterion wherever an item is evaluated for quality or staleness — it is a separate axis from usage recency (see Staleness Criteria and Quality Promotion Criteria above). An actively-used, "tested"-tier item can still carry an outdated or unverifiable research claim.
+
+### Source Traceability
+
+| Condition | Classification | Action |
+|-----------|----------------|--------|
+| Citation traces to `docs/research/source-index.md` and the number appears in that source | Verified | No action |
+| Citation does not appear in `docs/research/source-index.md` | Unverified citation | Flag for review — trace or remove |
+| Quantitative claim absent from its cited source | Unsupported number | Flag for correction |
+| Forge convention (team size, vocabulary payload counts, iteration caps, identity length, etc.) presented as a research finding | Mislabeled convention | Flag — relabel "Forge design standard" |
+
+### Model-Behavior Guidance Age
+
+Guidance about model behavior (prompting technique, persona effects, reasoning scaffolds, context handling) that is older than ~18 months requires one of:
+1. Re-confirmation against current-generation (Claude 4.5+/5) evidence, or
+2. An explicit "Forge design standard" label marking it as a house convention rather than a current finding.
+
+Guidance meeting neither condition is flagged "needs re-confirmation."
+
+### Current-Model Guidance Checklist
+
+These two checks apply to every agent, skill, and template regardless of citation status:
+
+1. **No reasoning-echo instructions.** Flag any instruction telling an agent to narrate, print, or echo its internal reasoning ("explain your thinking step by step," "show your chain of thought before answering," "think out loud"). Manual CoT scaffolding is deprecated on current reasoning models, and reasoning-echo instructions can trigger Fable 5's refusal classifier.
+2. **No over-prescriptive rule-stuffing.** Flag long enumerated rule lists or heavy MUST/NEVER stacking used in place of brief goal/boundary/verification framing. Current models perform better with concise, clearly-scoped instructions; recommend a rewrite pass rather than keeping the item as-is.
+
+### Severity
+
+Evidence-currency issues are reported findings, not automatic actions — they do not block promotion and do not trigger archival on their own. The Librarian flags them for manual correction; it does not rewrite item content.
+
+---
+
 ## Orphan Detection Criteria
 
 ### Reference Traversal

@@ -1,94 +1,102 @@
 # Team Design Patterns
 
-> Reference for Forge skill design. MetaGPT structured handoffs, Captain Agent adaptive composition, the cascade pattern, and communication topology comparison.
+> Reference for Forge skill design. MetaGPT structured handoffs, CaptainAgent adaptive composition, the cascade pattern, and communication topology comparison — with the numbers the sources actually report.
 
 ---
 
 ## MetaGPT: Structured Artifacts Over Free Dialogue
 
-**Source:** Hong et al., 2023
+**Source:** Hong et al., 2023 (arXiv:2308.00352; ICLR 2024 oral)
 
-MetaGPT demonstrated that multi-agent systems perform significantly better when agents communicate through structured artifact handoffs rather than free-form dialogue.
+MetaGPT demonstrated that multi-agent systems perform better when agents communicate through SOP-defined structured artifacts (requirements docs, design diagrams, interface specs) rather than free-form dialogue — explicitly to reduce "hallucinations caused by idle chatter between LLMs."
 
-### Key Findings
+### Key Findings (the paper's real numbers)
 
-- **Structured handoffs reduced error propagation by ~40%** compared to free dialogue.
-- Artifact-based communication is more token-efficient — less redundant back-and-forth.
-- Each agent produces a typed, verifiable deliverable rather than a conversation message.
-- The artifact chain creates an auditable trail of decisions.
+- On the SoftwareDev benchmark, MetaGPT scored **3.75/4 executability vs 2.25 for dialogue-based ChatDev**.
+- Human revision cost: **0.83 vs ChatDev's 2.5** — roughly 3x fewer manual corrections.
+- Executable-feedback ablation: **+4.2 points Pass@1 (HumanEval) and +5.4 (MBPP)**, reaching 85.9%/87.7%.
+- Adding specialized roles cut revision cost from 10 to 2.5 and raised executability from 1.0 to 4.0 in role ablations.
+
+*(A "~40% error reduction" figure previously circulated for MetaGPT appears in no version of the paper — do not cite it.)*
+
+**Caveat:** MAST's trace analysis (Cemri et al. 2025) shows MetaGPT itself still exhibits substantial failure rates — structured handoffs mitigate, not eliminate, multi-agent failures. The 2025-2026 literature treats structured vs natural-language agent communication as task-dependent, not settled universally.
 
 ### Why Artifacts Beat Dialogue
 
 | Dimension | Free Dialogue | Structured Artifacts |
 |---|---|---|
-| Error propagation | High — ambiguity compounds | Low — schemas enforce clarity |
+| Error propagation | High — ambiguity compounds | Lower — schemas enforce clarity |
 | Token efficiency | Low — redundant exchanges | High — one transmission per handoff |
 | Verifiability | Difficult — buried in conversation | Easy — discrete deliverable |
 | Auditability | Poor — must read full history | Good — artifact chain is the record |
 | Scalability | Degrades with team size | Stable — interfaces are typed |
 
+**Boundary condition (Cognition, 2025):** artifacts must not become lossy summaries that hide decisions. Where feasible, share full traces for decision-relevant context, and keep *writes* single-threaded — parallel writers make conflicting implicit decisions.
+
 ### Implications for Forge
 
-Every agent definition includes a Deliverables component (Component 3) specifying exact artifact formats. The team blueprint Artifact Chain section defines the flow between agents. No free-form dialogue between agents — only typed deliverables.
+Every agent definition includes a Deliverables component specifying exact artifact formats. The team blueprint Artifact Chain defines flow between agents. No free-form dialogue between agents — only typed deliverables. This also targets MAST's largest failure category: specification issues (41.77% of observed failures).
 
 ---
 
-## Captain Agent: Adaptive Team Composition
+## CaptainAgent: Adaptive Team Composition
 
-**Source:** Captain Agent research, 2024
+**Source:** Song et al., 2024 (arXiv:2405.19425; AutoGen/AG2 ecosystem)
 
-Captain Agent introduced dynamic team composition, where a coordinator selects team members per-task from a library of available agents.
+CaptainAgent dynamically forms and manages a fresh sub-team for each step — a captain agent selects members per-subtask from an agent library.
 
 ### Key Findings
 
-- **Adaptive composition outperformed static teams by 15-25%** on diverse task sets.
-- A "captain" agent analyzes the task and selects team members from an agent library.
-- Teams are composed per-task rather than per-project.
-- Task decomposition drives capability matching — the captain identifies required capabilities, then matches them to available agents.
+- **+21.94% average accuracy over existing multi-agent baselines** across six scenarios (math, programming, data analysis, science QA, world-information retrieval) without task-specific prompt engineering.
+- Baselines were other multi-agent methods (AutoAgents, AgentVerse, DyLAN, Meta-prompting, two-agent AutoGen) — **not a compute-matched strong single agent**, so this does not settle single-vs-team.
+- Adaptive composition also argued to prevent stereotypical/groupthink outputs.
+
+*(A "15-25% vs static teams" range previously cited for this work appears in no version of the paper.)*
+
+**Compute-confound caveat:** Tran & Kiela (2026, arXiv:2604.02460) show that with equal thinking-token budgets, single agents match or beat five MAS architectures on multi-hop reasoning — adaptive-composition gains measured against other MAS baselines should not be generalized into a universal team dividend.
 
 ### Static vs Adaptive Composition
 
-| Aspect | Static Team | Adaptive (Captain Agent) |
+| Aspect | Static Team | Adaptive (CaptainAgent) |
 |---|---|---|
 | Team definition | Fixed at project start | Selected per task |
 | Unused agents | Waste context/tokens | Not loaded |
 | Missing capabilities | Gap remains | Captain selects best available |
 | Task diversity | One team fits all | Specialized per task |
 | Overhead | Low (predefined) | Moderate (selection step) |
-| Performance on diverse tasks | 15-25% lower | Baseline (higher) |
 
 ### Implications for Forge
 
-The Forge library + Mission Planner architecture follows the Captain Agent pattern:
+The Forge library + Mission Planner architecture follows the CaptainAgent pattern:
 - Agent definitions stored in the library (the pool of available agents).
-- Mission Planner analyzes the user's goal and selects/composes the team (the captain role).
+- Mission Planner analyzes the goal and composes the team per mission (the captain role).
 - JIT agent generation fills capability gaps when no library agent matches.
 
 ---
 
 ## The Cascade Pattern
 
-The cascade applies the principle of minimal complexity — start with the simplest solution, escalate only on demonstrated failure.
+Start with the simplest solution, escalate only on demonstrated failure. This is the best-supported pattern in Forge: consistent with the ~45% baseline paradox and sequential-task degradation (Kim et al. 2025, arXiv:2512.08296), the compute confound (Tran & Kiela 2026), and Anthropic's "find the simplest solution possible" doctrine (Building Effective Agents, 2024).
 
 ### Levels
 
-| Level | Configuration | Token Cost | When to Use |
+| Level | Configuration | Cost expectation | When to Use |
 |---|---|---|---|
-| 0 | Single well-prompted agent | 1.0x | **Always try first** |
-| 1 | Single agent + tools (search, code exec, file I/O) | 1.2-1.5x | Agent needs external data or actions |
-| 2 | Two agents (worker + reviewer) | 2.2x | Quality validation needed |
-| 3 | Small team (3-5 agents, structured topology) | 3.5-7.0x | Task exceeds single-agent capability |
-| 4 | Multi-team with coordinator | 10x+ | Large scope, distinct workstreams |
+| 0 | Single well-prompted agent | Baseline | **Always try first** |
+| 1 | Single agent + tools (search, code exec, file I/O) | Small overhead | Agent needs external data or actions |
+| 2 | Worker + independent fresh-context verifier | ~2x | Quality validation needed — verifier subagents outperform self-critique (Anthropic, 2026) |
+| 3 | Small team (3-4 agents, 5 max, structured topology) | 2-6x efficiency penalty vs single agent (Kim et al.) | Task exceeds single-agent capability at comparable effort |
+| 4 | Multi-team with coordinator | Up to ~15x tokens for research-style orchestration (Anthropic, 2025) | Large scope, distinct parallelizable workstreams |
 
 ### Cascade Decision Rules
 
 1. **Start at Level 0.** Single agent with role identity, vocabulary, and task-specific SOP.
 2. **Escalate to Level 1** if the agent needs to search, execute code, or access files.
 3. **Escalate to Level 2** if output quality is insufficient and would benefit from independent review.
-4. **Escalate to Level 3** only if the task requires genuinely different expertise across subtasks AND a single agent trial showed clear capability gaps.
-5. **Escalate to Level 4** only for large-scope projects with multiple distinct workstreams that each require Level 3 teams.
+4. **Escalate to Level 3** only if the task decomposes into subtasks with typed interfaces AND requires genuinely different expertise AND a single-agent trial at comparable effort showed clear capability gaps.
+5. **Escalate to Level 4** only for large-scope projects with multiple distinct workstreams that each justify Level 3.
 
-**Never skip levels.** The 45% threshold (DeepMind) means single agents handle more than expected.
+**Never skip levels.** Tasks where a single agent already exceeds ~45% accuracy show *negative* returns from added agents (Kim et al.).
 
 ---
 
@@ -99,40 +107,46 @@ The cascade applies the principle of minimal complexity — start with the simpl
 | Free dialogue | Unstructured chat | Flexible, emergent behavior | Error-prone, token-heavy, unauditable | Exploration only (avoid in production) |
 | Artifact handoff | Typed deliverables | Verifiable, efficient, auditable | Requires format design upfront | **Default for Forge** |
 | Blackboard | Shared state space | Good for iterative refinement | Requires concurrency management | Collaborative editing, research synthesis |
-| Publish-subscribe | Event-driven notifications | Decoupled, scalable | Complex routing, message loss risk | Monitoring, reactive systems |
+| Publish-subscribe | Event-driven notifications | Decoupled, scalable | Complex routing, message-loss risk | Monitoring, reactive systems |
 | Pipeline | Sequential stage-to-stage | Simple, clear dependencies | Bottleneck at slowest stage | Linear workflows |
 
 ---
 
-## Topology Selection (from DeepMind Research)
+## Topology Selection (Kim et al., 2025)
 
 | Task Characteristic | Recommended Topology | Rationale |
 |---|---|---|
-| Strong sequential dependencies | Sequential pipeline | Each step depends on previous output |
-| Independent subtasks, shared goal | Parallel-independent + synthesis | Max throughput, coordinator merges |
-| Complex coordination, many deps | Centralized coordinator | One agent manages flow, prevents chaos |
-| Clear hierarchy, delegation | Hierarchical | Lead delegates, reviews, integrates |
+| Strong sequential dependencies | Single agent first | Every MAS variant degraded sequential tasks by 39-70% |
+| Independent subtasks, shared goal | Parallel-independent + centralized synthesis | Decomposable tasks gained up to +80.9%; centralized integration contains error amplification (4.4x vs 17.2x) |
+| Complex coordination, many deps | Centralized coordinator | One agent manages flow; budget +285% overhead |
+| Clear hierarchy, delegation | Hierarchical | Highest overhead (+515% hybrid); reserve for large scope |
 | Uncertain/exploratory | Single agent (Level 0) | Add complexity only when needed |
-| High tool density | Single agent (Level 0-1) | Coordination tax exceeds multi-agent benefit |
+| High tool density (16+ tools) | Single agent (Level 0-1) | Tool-coordination trade-off worsens with tool count |
 
 ---
 
 ## Team Design Anti-Patterns
 
 ### Premature Scaling
-Adding agents before proving single-agent insufficiency. Violates the cascade pattern. The 45% threshold means most tasks should start at Level 0.
+Adding agents before proving single-agent insufficiency. Violates the cascade; the baseline paradox means capable single agents are actively hurt by teammates.
+
+### Compute-Confounded Comparison
+Judging "the team did better" without giving the single agent comparable effort/thinking budget. Many published MAS gains vanish under equal budgets (Tran & Kiela 2026).
 
 ### Role Proliferation
-Creating a separate agent for every conceivable subtask. A "documentation agent," "naming agent," "formatting agent" — these should be responsibilities within a broader role, not separate agents. Each agent adds coordination overhead.
+A separate agent for every conceivable subtask ("documentation agent," "naming agent," "formatting agent"). These are responsibilities within a role; each extra agent adds coordination overhead.
 
 ### Communication Explosion
-N agents create N*(N-1)/2 potential communication channels. At 5 agents, that's 10 channels. At 7, it's 21. Keep teams at 3-5 agents and use structured topologies to limit actual channels.
+N agents create N*(N-1)/2 potential channels: 10 at 5 agents, 21 at 7. Keep teams at 3-4 (5 max) and use structured topologies to limit actual channels.
 
 ### Missing Quality Gates
-Allowing artifacts to flow downstream without verification. This enables error cascading (MAST FM-3.2) and lowest-common-denominator output (FM-3.5). Every handoff in the artifact chain should have explicit acceptance criteria.
+Artifacts flowing downstream without verification enables error cascades — and MAST attributes 21.3% of failures to the verification category. Every handoff gets explicit acceptance criteria.
 
 ### Homogeneous Teams
-All agents with similar capabilities and no role differentiation. This provides redundancy but not capability diversity. Multi-agent teams justify their cost only when agents bring genuinely different expertise.
+All agents with similar capabilities provide redundancy, not capability diversity — and homogeneous teams hit diversity ceilings fastest (Ringelmann-effect scaling law, 2026). Teams justify their cost only with genuinely different expertise.
+
+### Unintegrated Parallelism
+Parallel agents with no owner for synthesis. Independent teams amplified errors 17.2x vs 4.4x under a centralized integrator (Kim et al.).
 
 ---
 
@@ -140,13 +154,16 @@ All agents with similar capabilities and no role differentiation. This provides 
 
 | Metric | Value | Source |
 |---|---|---|
-| Error reduction from structured handoffs | ~40% | MetaGPT (Hong et al. 2023) |
-| Adaptive vs static team improvement | 15-25% | Captain Agent (2024) |
-| Optimal team size | 3-5 agents | DeepMind (2025) |
-| Saturation point | 4 agents | DeepMind (2025) |
-| Max review iterations before escalation | 3 rounds | MAST |
+| MetaGPT vs ChatDev executability | 3.75 vs 2.25 | Hong et al. 2023, arXiv:2308.00352 |
+| MetaGPT human revision cost | 0.83 vs 2.5 (~3x fewer) | Hong et al. 2023 |
+| Adaptive composition vs MAS baselines | +21.94% | Song et al. 2024, arXiv:2405.19425 |
+| Sequential-task degradation under MAS | −39% to −70% | Kim et al. 2025, arXiv:2512.08296 |
+| Error amplification, independent vs centralized | 17.2x vs 4.4x | Kim et al. 2025 |
+| Research orchestrator-worker gain / cost | +90.2% / ~15x tokens | Anthropic, 2025 |
+| Recommended team size / hard cap | 3-4 / 5 | **Forge design standard** (see scaling-laws.md) |
+| Max review iterations before escalation | 3 rounds | **Forge design standard** (basis: Self-Refine plateau) |
 | Communication channels for N agents | N*(N-1)/2 | Graph theory |
 
 ---
 
-*Source: Skill Design Research Synthesis §6.1-6.5, MetaGPT, Captain Agent, DeepMind scaling*
+*Sources: Hong et al. (2023), arXiv:2308.00352; Song et al. (2024), arXiv:2405.19425; Kim et al. (2025), arXiv:2512.08296; Tran & Kiela (2026), arXiv:2604.02460; Cemri et al. (2025), arXiv:2503.13657; Anthropic engineering blog (2024-2026); Cognition (2025). See docs/research/source-index.md.*

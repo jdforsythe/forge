@@ -37,13 +37,17 @@ description: |
 
 <!-- WHY this description works:
   1. DUAL REGISTER: Expert terms (cyclomatic complexity, connascence)
-     route to deep knowledge. Casual phrases ("is this good?") ensure
+     route to deep knowledge; casual phrases ("is this good?") ensure
      activation on informal queries.
   2. PUSHY: Lists synonyms (diff feedback, merge request review,
-     pre-commit checks) to combat undertriggering.
-  3. EXPLICIT EXCLUSIONS: Prevents mis-triggers on architecture or
-     code generation tasks.
-  4. ~100 WORDS: Dense but not diluted.
+     pre-commit checks) to combat undertriggering -- verified in
+     Anthropic's skill-creator docs.
+  3. EXPLICIT EXCLUSIONS prevent mis-triggers on architecture/codegen.
+  4. ~100 WORDS, THIRD PERSON. Platform hard limit (Claude Code, 2026):
+     description max 1024 chars; description + `when_to_use` truncates
+     at 1,536 chars in a ~1%-of-context skill listing. Push hard here
+     -- but keep the BODY lean (over-prescription degrades output on
+     Claude 4.5+/5; see Behavioral Instructions note).
 -->
 
 # Code Review
@@ -55,18 +59,16 @@ Structured code review that finds real problems, not style nitpicks.
 
 ## Expert Vocabulary Payload
 
-<!-- WHY THIS IS FIRST: Vocabulary primes the routing signal in
-  embedding space BEFORE the model reads instructions. Every term
-  here activates a specific knowledge cluster. Without this section,
-  the model draws from generic "code review" content (blog posts,
-  junior tutorials). With it, the model routes to expert-level
-  review knowledge.
+<!-- WHY THIS IS FIRST: Precise vocabulary steers output register
+  toward expert content before the model reads instructions, away
+  from the generic training-data defaults (distributional
+  convergence). ("Activates a knowledge cluster in embedding space"
+  is a working model, not a published finding.)
 
-  WHY CLUSTERS: Grouping by sub-domain ensures coverage across the
-  full scope of code review, not just one narrow aspect. 3-5 clusters
-  of 3-8 terms each is the effective range.
-
-  EVERY TERM passes the 15-year practitioner test. -->
+  WHY CLUSTERS: 3-5 clusters of 3-8 terms is a Forge design standard,
+  not a measured optimum. Every term passes the 15-year practitioner
+  test -- but don't maximize jargon; Schreiter (2025) found peer-
+  register precision beats maximal technicality. -->
 
 **Structural Analysis:**
 cyclomatic complexity (McCabe), cognitive complexity (SonarSource),
@@ -92,14 +94,12 @@ testing (QuickCheck), test pyramid (Cohn), characterization tests
 
 ## Anti-Pattern Watchlist
 
-<!-- WHY BEFORE INSTRUCTIONS: The model reads these BEFORE behavioral
-  steps, so it checks for problems first. Anti-patterns also function
-  as vocabulary routing — "rubber-stamp approval" activates knowledge
-  about review failure modes.
-
-  Each pattern has: Name (established term), Detection (observable
-  signal), Resolution (concrete action). This is the full
-  Detect-Name-Resolve pattern. -->
+<!-- WHY BEFORE INSTRUCTIONS: The model checks for problems before
+  doing the work. Named anti-patterns double as vocabulary --
+  "rubber-stamp approval" sets the same expert register as positive
+  vocabulary (a register effect, not a proven "cluster activation"
+  mechanism -- see skill-principles.md §1). Each pattern has: Name,
+  Detection, Resolution. -->
 
 ### 1. Rubber-Stamp Approval
 **Detection:** Reviewer approves with "LGTM" or generic praise without specific observations. Review took <2 minutes for 200+ line change.
@@ -126,12 +126,16 @@ testing (QuickCheck), test pyramid (Cohn), characterization tests
 ## Behavioral Instructions
 
 <!-- WHY ORDERED STEPS: Numbered imperative steps produce more reliable
-  execution than prose. Each step has exactly one interpretation.
-  IF/THEN conditions handle branching explicitly.
+  execution than prose. IF/THEN conditions handle branching. Anti-
+  pattern scan is step 1 so the model checks for problems first.
 
-  WHY ANTI-PATTERN SCAN IS STEP 1: Check for problems before
-  doing the work. This prevents the model from completing a full
-  review and then noticing the PR is actually a design question. -->
+  WHY THIS STAYS LEAN: Five steps, no hedging, no enumerated edge cases
+  -- more would be over-prescription tuned for an older model and can
+  degrade output on Claude 4.5+/5; test removing steps before adding
+  more. Step 5 asks for a conclusion with brief rationale, never a
+  transcript -- don't instruct a skill to "show its reasoning step by
+  step," which risks the reasoning-extraction refusal classifier on
+  Claude Fable 5 (manual CoT scaffolding is deprecated). -->
 
 1. Scan the submitted code and the user's request for anti-patterns from the watchlist above.
    IF an anti-pattern is detected: name it, explain why it matters, and recommend how to proceed before continuing the review.
@@ -193,13 +197,14 @@ testing (QuickCheck), test pyramid (Cohn), characterization tests
 
 ## Examples
 
-<!-- WHY 2 EXAMPLES: Enough to show the pattern, not so many that they
-  overflow context. The GOOD example is placed LAST because recency
-  bias gives it the strongest influence on output quality.
-
-  WHY BAD vs GOOD: Contrastive pairs communicate quality standards
-  more effectively than positive examples alone. The model sees both
-  what to avoid and what to produce. -->
+<!-- WHY 3-5 EXAMPLES IN PRACTICE: Anthropic recommends 3-5 diverse
+  examples (LangChain found 3 roughly matched 9 -- diminishing returns
+  beyond that). This template shows one BAD/GOOD pair to keep it short;
+  a real skill should include 3-5, with at least one hard case. GOOD
+  is placed LAST -- recency bias (Zhao et al., ICML 2021) gives it the
+  strongest influence, an exploitation heuristic, not a tested
+  prescription. Contrastive BAD/GOOD pairs communicate quality
+  standards more effectively than positive examples alone. -->
 
 ### BAD Review Output (generic, unhelpful)
 

@@ -1,151 +1,116 @@
 # Persona Science Reference
 
-> Focused extract of PRISM research findings for the Agent Creator skill. Use this when designing the Role Identity component of agent definitions.
+> Condensed operational extract of `docs/research/persona-science.md` for the Agent Creator skill. Use this when designing the Role Identity component of agent definitions. What controlled studies actually show: personas steer alignment, tone, format, and scope. They do not improve factual accuracy, and on knowledge-heavy tasks longer personas hurt more.
 
 ---
 
-## PRISM Framework Summary
+## The Evidence Base
 
-PRISM (Persona Research in Instruction-following and Systematic Measurement) studied how persona assignment affects LLM output quality. The findings directly inform how Forge agents are designed.
+Four studies anchor this file:
 
----
+1. **Zheng et al. (2024)** (arXiv:2311.10054, EMNLP Findings). 162 personas, 4 model families, 2,410 factual questions: personas did **not** improve accuracy over no persona; some mildly hurt.
+2. **Hu, Rostami & Thomason (2026), "Expert Personas Improve LLM Alignment but Damage Accuracy"** (arXiv:2603.18507). Introduces PRISM (*Persona Routing via Intent-based Self-Modeling*), a gated-LoRA method — not a token-length rule. Core finding: the **alignment-accuracy tradeoff** (below).
+3. **Wharton Prompting Science Report 4 (2025)** (SSRN 5879722). Expert personas: no consistent factual-accuracy gain on modern frontier models.
+4. **Xiao et al. (2026)** (arXiv:2605.29420). 1,140 questions, 38 roles: personas help advisory questions, underperform on conceptual/explanatory ones, and increase judged depth while reducing clarity.
 
-## Finding 1: Brief Identities Produce the Best Results
-
-Accuracy damage scales with persona length — the longer the identity, the greater the degradation. Identities should be the minimum length required to convey role, responsibility, and organizational context: no shorter, no longer. Under 50 tokens is the practical sweet spot.
-
-| Persona Length | Tokens | Alignment | Accuracy | Verdict |
-|---|---|---|---|---|
-| None | 0 | Low | Baseline | No role anchoring — unreliable |
-| Brief | <50 | High | High | **Optimal — use this** |
-| Medium | 50-100 | High | Moderate | Acceptable for complex roles |
-| Long | 100-200 | Very high | Degraded | Not recommended |
-| Excessive | 200+ | Extreme | Significantly degraded | Counter-productive |
-
-**Why longer is worse:**
-- Attention budget is consumed by persona processing instead of task processing.
-- Longer descriptions contain more specific claims, increasing bias toward those claims.
-- Flattery and superlatives tend to appear in longer personas, triggering generic clusters.
-
-**Practical threshold:** Keep Role Identity under 50 tokens. If you need to express more domain knowledge, put it in the Vocabulary Payload — that is where detailed terms belong.
-
----
-
-## Finding 2: Real Job Titles Activate Training Data Clusters
-
-"You are a senior site reliability engineer" activates SRE-related training data more effectively than "You are an expert in keeping systems running."
-
-**Mechanism:** Real titles that exist in real organizations have dense representation in LLM training data. The model has seen thousands of documents written by and about SREs, product managers, security engineers, etc. A real title is a high-precision pointer into that knowledge.
-
-**Implications for agent design:**
-- Always use a title that appears in actual job listings.
-- "Software architect" not "code design guru."
-- "Product manager" not "product visionary."
-- "Security engineer" not "cyber guardian."
-- If the role is niche, use the closest standard title and add specifics in the responsibility clause.
-
----
-
-## Finding 3: Flattery Degrades Output
-
-"You are the world's best programmer" performs **worse** than "You are a software engineer."
-
-**Mechanism:** As demonstrated by Ranjan et al. (2024), "One Word Is Not Enough," superlatives route to motivational/marketing embedding clusters rather than domain expertise clusters. The model shifts toward producing text that sounds impressive rather than text that is correct.
-
-**Banned terms in Forge agent identities:**
-- "world-class," "best," "expert," "genius," "leading," "top-tier"
-- "unparalleled," "exceptional," "extraordinary," "brilliant"
-- "always," "never" (absolutes that create unrealistic constraints)
-
-**Rule:** Define the role through what they KNOW and DO, not how good they are.
+**Synthesis:** a role identity is a behavior-shaping instrument — tone, register, scope, instruction-following. It is not an accuracy or capability lever.
 
 ---
 
 ## The Alignment-Accuracy Tradeoff
 
-PRISM identified a fundamental tension:
+The central finding (Hu et al. 2026):
 
-| Dimension | Effect of Stronger Persona |
+| Dimension | Effect of stronger/longer persona |
 |---|---|
-| **Alignment** | Improves — model follows instructions more closely |
-| **Accuracy** | Can degrade — persona bias distorts factual outputs |
+| Alignment (instruction-following, safety, format) | Improves — longer personas gave the largest gains |
+| Factual accuracy (knowledge retrieval) | Degrades — and degrades *more* as the persona gets longer |
 
-**The tension:** A strong persona makes the model more obedient but can make it less truthful. An overly specific persona may cause the model to generate outputs that "sound like" the role rather than outputs that are correct.
+MMLU: 71.6% no-persona baseline → 68.0% with a ~5-token persona → 66.3% with a ~150-token persona. Even the minimal persona underperformed no persona at all on this knowledge task — brevity is the least-bad option for accuracy, not an accuracy optimizer.
 
-**Optimal balance for Forge agents:**
-- Brief, realistic role identity (~20-50 tokens) for alignment.
-- Domain vocabulary payload (15-30 terms) for accuracy.
-- The identity anchors the role; the vocabulary activates the knowledge. These are separate mechanisms and should be kept separate in the agent definition.
+**How Forge resolves it:** identities set scope, register, and decision boundaries (alignment goods). Factual quality is carried by other mechanisms — verification, independent review, grounding claims in artifacts — never by the persona.
 
 ---
 
-## The Role-Task Alignment Rule
+## Length Guidance
 
-Persona effectiveness depends entirely on whether the role matches the task domain:
+**What the evidence says:** damage on knowledge tasks grows with persona length. There is **no published token threshold** — no study establishes a "<50-token optimum" or a ">100-token cliff."
 
-| Alignment | Example | Effect |
+> **Forge design standard:** keep Role Identity to ~20-50 tokens (1-3 sentences) — the minimum needed for role, responsibility, and organizational context. This is a convention motivated by the length-scaling *direction* above and by context economy, not a measured optimum. When building Step 4a, count tokens against this convention and trim; if more domain depth is needed, it belongs in the Vocabulary Payload, not the identity.
+
+---
+
+## Role-Task Fit
+
+| Task type | Persona effect |
+|---|---|
+| Advisory / open-ended (recommendations, risk communication) | Helps — structured expert framing adds value |
+| Safety / format / preference-judged generation | Helps — the alignment side of the tradeoff |
+| Conceptual explanation, factual QA | Neutral to harmful — plain, clear prompting wins |
+
+**Rule:** match the role to the task's register; don't expect the role to add knowledge. A misaligned persona buys clarity loss with no offsetting gain.
+
+**Corollary — one role per agent.** Combining titles ("architect and also PM and QA lead") muddles scope and decision boundaries — the things a role actually controls. When building Step 4a, verify the job title matches the primary deliverables in Step 4c.
+
+---
+
+## Real Titles and No Superlatives (Design Standards)
+
+Both are Forge conventions, not measured effects. State them honestly:
+
+1. **Use a real job title.** No study shows real titles outperform invented ones (Zheng et al. tested occupational roles: no accuracy gain). Forge keeps real titles because they are concise, unambiguous scope descriptors that make teams legible to humans and map to real deliverables — not because they unlock hidden model capability.
+2. **No superlatives** ("world-class," "best," "genius," "unparalleled"). No study isolates flattery inside personas against plain role statements. Forge bans them as a style convention: they add tokens, add no scope information, and claim quality instead of defining behavior. Adjacent evidence: heavy-handed role assignments "may backfire by limiting helpfulness" (DigitalOcean, practitioner tier); excessive flattery toward the model buys nothing (Yin et al. 2024, arXiv:2402.14531).
+
+**Retired — do not reintroduce:** "real titles activate dense training-data clusters," "flattery routes to motivational/marketing embedding clusters," any attribution of these to PRISM or to Ranjan (2025, arXiv:2512.06744, a word-embedding formatting study unrelated to personas).
+
+---
+
+## Practical Persona Design Rules
+
+1. Use a real job title — a scope descriptor, not a capability claim.
+2. Keep the identity to ~20-50 tokens (Forge convention).
+3. Define through responsibility and boundaries, not quality claims.
+4. Include organizational context — reporting line and collaborators.
+5. Carry expertise depth in the vocabulary payload, not the persona.
+6. No superlatives — style convention.
+7. One role per agent.
+8. Don't rely on the persona for correctness — pair every producing agent with independent verification.
+
+---
+
+## Identity Format
+
+```markdown
+## Role Identity
+You are a [real job title] responsible for [primary responsibility]
+within [organizational context]. You report to [authority] and
+collaborate with [adjacent roles].
+```
+
+**Token budget:** ~20-50 tokens (Forge convention).
+
+**Good:**
+> You are a software architect responsible for system design and technical decision-making within a product engineering team. You report to the engineering director and collaborate with the product manager, lead engineer, and QA engineer.
+
+**Bad (long, flattery, no scope information):**
+> You are a world-class, highly experienced software architect with decades of expertise in building scalable, resilient, high-performance distributed systems. You are known for your exceptional ability to make brilliant technical decisions that consistently lead to successful outcomes.
+
+The bad example spends ~60 tokens claiming quality, defines no boundaries, and — per the tradeoff above — buys alignment pressure at a small accuracy cost with nothing in return.
+
+---
+
+## Key Findings
+
+| Finding | Result | Source |
 |---|---|---|
-| **Aligned** | Software architect assigned system design | Strong positive improvement |
-| **Neutral** | Software architect assigned marketing copy | No improvement |
-| **Misaligned** | Software architect assigned poetry writing | Active degradation |
-
-**Rule:** Always match the persona to the task domain. A misaligned persona is worse than no persona at all.
-
-**Corollary for multi-role agents:** Do not combine roles. "You are a software architect and also a project manager and QA lead" fragments knowledge activation across three clusters. None gets full attention. Pick the one role most central to the primary task.
-
----
-
-## When Personas Help vs. Hurt
-
-### Personas Help When:
-- The role matches the task domain (aligned persona).
-- The identity is brief (<50 tokens) and uses a real job title.
-- Domain vocabulary accompanies the identity.
-- The role includes organizational context (reporting lines, collaborators).
-- The task requires domain-specific knowledge or terminology.
-
-### Personas Hurt When:
-- The identity is long (>100 tokens), consuming attention budget.
-- Flattery or superlatives are present, activating generic clusters.
-- The role does not match the task (misaligned persona).
-- Multiple roles are combined in one agent, fragmenting activation.
-- The persona makes quality claims instead of knowledge claims.
-
-### Personas Are Neutral When:
-- The task is general-purpose (summarization, translation) and the role adds no domain knowledge.
-- The persona is well-constructed but the task doesn't require domain expertise.
+| Personas → factual accuracy | No improvement; sometimes mildly negative | Zheng et al. 2024, arXiv:2311.10054 |
+| Expert personas: alignment vs accuracy | Alignment up, knowledge retrieval down (MMLU 71.6%→68.0%→66.3%) | Hu et al. 2026, arXiv:2603.18507 |
+| Expert personas on frontier models | No consistent factual gain | Wharton Prompting Science Report 4, 2025 |
+| Where personas help | Advisory/open-ended tasks; depth up, clarity down | Xiao et al. 2026, arXiv:2605.29420 |
+| Longer personas on knowledge tasks | More damage than minimal ones | Hu et al. 2026 |
+| Identity length ~20-50 tokens | Convention | **Forge design standard** |
+| Real titles / no superlatives | Convention (scope clarity, token economy) | **Forge design standard** |
 
 ---
 
-## Key Numbers for Agent Creator
-
-| Metric | Value | Use |
-|---|---|---|
-| Optimal persona length | <50 tokens | Cap for Role Identity section |
-| Accuracy degradation threshold | >100 tokens | Hard ceiling — never exceed |
-| Vocabulary payload size | 15-30 terms | Separate from identity |
-| Vocabulary clusters | 3-5 per agent | Organize terms by sub-domain |
-| Flattery effect | Negative on accuracy (Ranjan et al., 2024) | Zero tolerance in Forge agents |
-| Alignment improvement | Strongest at <50 tokens | Diminishing returns beyond |
-| Role-task alignment | Required for positive effect | Verify before finalizing |
-
----
-
-## Applying PRISM in the Agent Creator Workflow
-
-When building Step 4a (Role Identity), check:
-
-1. **Token count:** Count the tokens in the identity statement. Over 50? Trim. Move detail to vocabulary payload.
-2. **Real title:** Is this a job title from actual organizations? If not, find the closest real title.
-3. **Flattery scan:** Any superlatives or quality claims? Remove them.
-4. **Organizational context:** Are reporting lines and collaborators specified? Add them.
-5. **Role-task match:** Does the title match the deliverables? A "software architect" who only writes marketing copy is misaligned.
-
-When building Step 4b (Vocabulary Payload):
-- This is where domain knowledge depth goes — not the identity.
-- The identity activates the broad cluster; vocabulary terms narrow to specific sub-domains.
-- These are complementary mechanisms. Do not conflate them.
-
----
-
-*Source: Extracted from docs/research/persona-science.md for Agent Creator skill use. PRISM: arxiv.org/abs/2603.18507; Ranjan et al. (2024): arxiv.org/abs/2512.06744*
+*Condensed from `docs/research/persona-science.md`. Full bibliography: `docs/research/source-index.md`.*

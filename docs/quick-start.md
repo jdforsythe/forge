@@ -199,7 +199,7 @@ The process is interactive, not fire-and-forget:
 
 ### When in doubt
 
-If you are not sure whether your goal needs a team or a single agent, just describe what you want. Mission Planner applies evidence-based scaling criteria (the DeepMind decomposability framework) to make that call. It will choose single-agent when that is the right answer -- it is not biased toward creating teams.
+If you are not sure whether your goal needs a team or a single agent, just describe what you want. Mission Planner applies evidence-based scaling criteria (Kim et al.'s decomposability framework, arXiv:2512.08296) to make that call. It will choose single-agent when that is the right answer -- it is not biased toward creating teams.
 
 ---
 

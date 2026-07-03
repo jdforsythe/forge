@@ -1,14 +1,21 @@
 # Vocabulary Routing
 
-> Reference for Forge skill design. How precise vocabulary routes LLM attention to expert knowledge clusters, the 15-year practitioner test, sub-domain clustering, and term selection.
+> Reference for Forge skill design. Precise domain vocabulary steers model output toward expert-register, distinctive results — with important bounds. The mechanism, what the evidence supports, the 15-year practitioner test, sub-domain clustering, and term selection.
 
 ---
 
-## Core Mechanism
+## What the Evidence Supports
 
-LLMs organize knowledge in embedding space clusters. Specific technical terms activate specific clusters. The choice of vocabulary in a prompt determines which knowledge regions the model draws from.
+**The effect is real for generative output.** Anthropic's frontend-design work ("Improving frontend design through Skills," Nov 2025) diagnoses generic output as *distributional convergence* — safe, universally acceptable choices dominate training data, so unguided sampling lands on them. The fix that worked was a ~400-token skill of targeted design vocabulary plus explicit never-use lists: "Tell Claude to 'avoid Inter and Roboto' or 'use atmospheric backgrounds instead of solid colors,' and results improve immediately." Specific vocabulary unlocks capability the model already has but doesn't express by default.
 
-**Key insight:** A single precise term can replace paragraphs of explanation. "Bounded context (Evans, DDD)" activates the Domain-Driven Design knowledge cluster more reliably than "separate the code into logical pieces."
+**Prompt wording is a first-order design lever.** MASS (Zhou et al., ICLR 2026, arXiv:2502.02533) found that in multi-agent system design, *prompt optimization dominates topology choice* — reinforcing vocabulary/prompt quality as the primary lever, ahead of structural complexity.
+
+**But more specificity is not monotonically better.** Schreiter (2025, arXiv:2505.17037) systematically varied terminology specificity across STEM, law, and medicine QA and found an **optimal mid-range**: neither overly generic nor maximally technical wording performs best, consistently across models. Jargon-maximizing is not the goal; *precision at the register experts actually use* is.
+
+**Scope limits (honesty section).**
+- The popular mechanistic story — "terms activate knowledge clusters in embedding space" — is a plausible *working hypothesis*, not a published finding. No paper demonstrates term-to-cluster routing for generative LLM output. Treat cluster language in this file as a mental model.
+- Vocabulary steers *register, style, and domain framing* of generated output. It is not demonstrated to improve *factual accuracy* — don't lean on vocabulary where verification is the right tool.
+- Ranjan (2025, arXiv:2512.06744) is sometimes cited here; it only shows that prompt formatting affects *word-embedding* quality for isolated words. It says nothing about terminology in agent prompts.
 
 ---
 
@@ -22,13 +29,13 @@ For every vocabulary term in an agent definition, apply this test:
 - **Fail:** "best practices for error handling" — no senior says this to a peer. It's consultant-speak.
 - **Fail:** "stochastic gradient descent with momentum" — unless the agent is an ML researcher. Domain match matters.
 
-Terms that fail this test either activate generic knowledge clusters (consultant-speak) or irrelevant clusters (wrong domain).
+This test operationalizes Schreiter's mid-range optimum: peer-register terms are precise without being maximally technical.
 
 ---
 
 ## Sub-Domain Clustering
 
-Organize vocabulary into 3-5 clusters of 3-8 related terms. Each cluster activates a distinct knowledge sub-domain.
+> **Forge design standard.** Organize vocabulary into 3-5 clusters of 3-8 related terms (15-30 total). These counts are Forge conventions for coverage without dilution — no study prescribes them.
 
 ### Example: Software Architect Agent
 
@@ -54,16 +61,16 @@ zero trust architecture, network segmentation, mTLS, secrets management, IAM pol
 
 ### Cluster Design Rules
 
-1. **3-5 clusters per agent.** Fewer than 3 underspecifies; more than 5 fragments attention.
+1. **3-5 clusters per agent.** Fewer underspecifies the role; more fragments focus.
 2. **3-8 terms per cluster.** Enough to define the sub-domain, not so many that signal dilutes.
-3. **15-30 total terms per agent.** The practical range for effective vocabulary payloads.
+3. **15-30 total terms per agent.** The Forge working range.
 4. **Group by knowledge proximity.** Terms in a cluster should co-occur in expert discourse.
 
 ---
 
 ## Generic vs Expert Term Comparison
 
-| Generic Term (Avoid) | Expert Term (Use) | Knowledge Cluster Activated |
+| Generic Term (Avoid) | Expert Term (Use) | Domain framing established |
 |---|---|---|
 | "separate concerns" | "bounded context (Evans)" | DDD, microservices, context mapping |
 | "handle errors gracefully" | "circuit breaker pattern (Nygard)" | Resilience engineering, Release It! |
@@ -80,15 +87,9 @@ zero trust architecture, network segmentation, mTLS, secrets management, IAM pol
 
 ---
 
-## Attribution Amplifies Routing
+## Attribution
 
-Including the originator of a framework strengthens knowledge activation:
-
-| Attribution Level | Example | Activation Strength |
-|---|---|---|
-| Term only | "INVEST criteria" | Moderate |
-| Term + author | "INVEST criteria (Bill Wake)" | Strong |
-| Term + author + work | "fitness functions (Ford and Parsons, Building Evolutionary Architectures)" | Strongest |
+Including the originator of a framework ("fitness functions (Ford and Parsons)") disambiguates the term and anchors the intended meaning — several named patterns share words with unrelated concepts. This is a precision practice; claims that attribution "amplifies activation strength" are the working hypothesis, not a measured effect.
 
 **When to attribute:**
 - Always attribute foundational frameworks: DDD (Evans), SOLID (Martin), 12-Factor (Wiggins)
@@ -100,15 +101,20 @@ Including the originator of a framework strengthens knowledge activation:
 ## Anti-Patterns in Vocabulary Selection
 
 ### Consultant-Speak
-Terms that sound professional but activate generic business writing clusters:
+Terms that sound professional but carry no domain precision:
 - "best practices," "leverage," "synergy," "paradigm shift," "holistic approach"
 - "optimize," "streamline," "robust solution," "scalable framework"
-- These are banned in Forge agent definitions.
+- Banned in Forge agent definitions — they are the distribution center, not a route out of it.
 
 ### Buzzword Stacking
 Listing trendy terms without coherence:
 - "AI-driven blockchain microservices with DevSecOps and zero trust"
-- This creates a scatter-shot activation pattern. No single knowledge cluster dominates.
+- No coherent domain framing; reads as marketing copy and invites marketing-register output.
+
+### Over-Specificity
+The inverse failure — Schreiter's result cuts both ways. Maximally technical wording underperforms the expert mid-range:
+- "utilize polysemous lexical disambiguation heuristics" → "pick unambiguous names"
+- If a peer would simplify the term, simplify it.
 
 ### Over-Abstraction
 Using umbrella terms when specifics exist:
@@ -118,9 +124,8 @@ Using umbrella terms when specifics exist:
 
 ### Domain Mismatch
 Loading vocabulary from a different domain than the task:
-- ML vocabulary in a frontend agent definition
-- Security terms in a content writing agent
-- Each term that doesn't match the task domain wastes attention budget and may activate misleading clusters.
+- ML vocabulary in a frontend agent definition; security terms in a content-writing agent.
+- Mismatched terms waste context and set the wrong register for the output.
 
 ---
 
@@ -135,14 +140,12 @@ For Forge agent definitions:
 **[Sub-domain 3]:** term9, term10, term11, term12
 ```
 
-**Constraints:**
-- 15-30 terms total
-- 3-5 clusters
-- 3-8 terms per cluster
+**Constraints (Forge design standard):**
+- 15-30 terms total, 3-5 clusters, 3-8 terms per cluster
 - Include originator attribution for named frameworks
 - Every term passes the 15-year practitioner test
-- No consultant-speak, no buzzwords, no over-abstractions
+- No consultant-speak, no buzzword stacking, no over-abstraction — and no jargon beyond the peer register
 
 ---
 
-*Source: Skill Design Research Synthesis §2.1-2.6*
+*Sources: Anthropic, "Improving frontend design through Skills" (Nov 2025); Schreiter (2025), arXiv:2505.17037; Zhou et al., MASS (ICLR 2026), arXiv:2502.02533. Cluster/count conventions are Forge design standards. See docs/research/source-index.md.*

@@ -22,7 +22,7 @@ estimated_cost_tier: low | medium | high
 - `domain`: Primary domain category
 - `complexity`: Whether this requires one agent or a team (single-agent blueprints have agent_count: 1)
 - `topology`: Communication/coordination architecture (see Topology Guide)
-- `agent_count`: Number of agents (3-5 for teams; exceeding 5 requires explicit justification)
+- `agent_count`: Number of agents (3-4 recommended for teams; 5 is a hard cap requiring explicit justification)
 - `estimated_cost_tier`: Relative token cost (low: <50K tokens total, medium: 50-200K, high: >200K)
 
 ---
@@ -138,7 +138,7 @@ estimated_cost_tier: high
 
 ## Complexity Assessment Criteria
 
-Based on DeepMind scaling research:
+Based on Kim et al.'s Google Research/MIT-led multi-agent scaling research:
 
 1. **Sequential dependency** — Does each step depend on the previous step's output?
    - High → sequential pipeline or single agent

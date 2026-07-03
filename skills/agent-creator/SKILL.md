@@ -1,7 +1,7 @@
 ---
 name: agent-creator
 description: |
-  Creates structured agent definitions using the 7-component format grounded in persona science (PRISM), vocabulary routing, and failure mode taxonomy (MAST). Produces agents with real-world job titles, expert domain vocabulary payloads (15-30 terms), explicit deliverables, decision boundaries, imperative SOPs, and named anti-pattern watchlists.
+  Creates structured agent definitions using the 7-component format grounded in persona science (the alignment-accuracy tradeoff), vocabulary routing, and the MAST failure taxonomy + Forge watchlist. Produces agents with real-world job titles, expert domain vocabulary payloads (15-30 terms), explicit deliverables, decision boundaries, imperative SOPs, and named anti-pattern watchlists.
 
   Use this skill when the user wants to create an agent, define a role, build a persona, or needs a specialized AI assistant for a specific domain. Also triggers when Mission Planner delegates agent creation for team roles. Works for any domain — software, marketing, security, operations, design, writing, research, and more.
 
@@ -10,7 +10,7 @@ description: |
 
 # Agent Creator
 
-Creates structured agent definitions following the 7-component format. Every agent produced by this skill is grounded in persona science research, vocabulary routing mechanics, and the MAST failure taxonomy.
+Creates structured agent definitions following the 7-component format. Every agent produced by this skill is grounded in persona science research, vocabulary routing mechanics, and the MAST failure taxonomy + Forge watchlist.
 
 ---
 
@@ -19,8 +19,8 @@ Creates structured agent definitions following the 7-component format. Every age
 **Agent Design:** role identity, domain vocabulary payload, deliverables, decision authority, standard operating procedure, anti-pattern watchlist, interaction model, handoff artifact, quality gate
 **Organizational Structure:** RACI matrix, task-relevant maturity (Andy Grove), blast radius, reporting lines, escalation path, out-of-scope boundary
 **Security & Risk:** STRIDE threat model, OWASP Top 10, attack surface, threat modeling (Shostack)
-**Persona Science:** persona alignment, persona-accuracy tradeoff, PRISM framework, role-task alignment rule, flattery degradation, token budget
-**Vocabulary Mechanics:** vocabulary routing, embedding space, knowledge cluster, distribution center, 15-year practitioner test, sub-domain clustering, attribution amplification
+**Persona Science:** persona alignment, alignment-accuracy tradeoff, role-task fit, persona-length effect, identity token budget
+**Vocabulary Mechanics:** vocabulary routing, distributional convergence, register steering, distribution center, 15-year practitioner test, sub-domain clustering, framework attribution
 
 ---
 
@@ -28,18 +28,18 @@ Creates structured agent definitions following the 7-component format. Every age
 
 ### Flattery Persona
 - **Detection:** Superlatives and absolutes in role identity — "world-class," "best," "always," "never," "unparalleled," "leading expert."
-- **Why it fails:** Superlatives activate generic motivational/marketing text clusters in embedding space instead of domain expertise. Ranjan et al. (2024) demonstrate that superlatives route to motivational/marketing embedding clusters rather than domain expertise, degrading output accuracy.
+- **Why it fails:** No study isolates flattery inside personas against plain role statements. Forge bans superlatives as a style convention: they add tokens, add no scope information, and claim quality instead of defining behavior. Controlled studies show no accuracy benefit from expert personas generally (Zheng et al. 2024, arXiv:2311.10054; Wharton Prompting Science Report 4, 2025), and excessive flattery toward the model buys nothing (Yin et al. 2024, arXiv:2402.14531).
 - **Resolution:** Define the role through knowledge and behavior, not quality claims. Remove every superlative. Describe what the agent knows and does, not how good it is.
 
 ### Bare Role Label
 - **Detection:** Identity is fewer than 10 tokens with no organizational context. Example: "You are a product manager."
-- **Why it fails:** Activates the broadest possible cluster for that role. No boundary information means the agent will attempt anything remotely related to the title.
+- **Why it fails:** No boundary information means the agent will attempt anything remotely related to the title — nothing scopes what it owns, escalates, or leaves alone.
 - **Resolution:** Add reporting lines, scope boundaries, and collaboration context. Specify the organizational unit and adjacent roles.
 
 ### Verbose Identity
 - **Detection:** Identity section exceeds 50 tokens or is a full paragraph of description.
-- **Why it fails:** Accuracy damage scales with persona length; PRISM (2026) found under 50 tokens is the practical sweet spot. Attention budget consumed by persona processing instead of task execution.
-- **Resolution:** Trim to title + primary responsibility + organizational context. Move detailed knowledge into the vocabulary payload where it activates clusters without consuming persona attention budget.
+- **Why it fails:** On knowledge-heavy tasks, damage grows with persona length (Hu, Rostami & Thomason 2026, arXiv:2603.18507: MMLU 71.6% no-persona → 68.0% at ~5 tokens → 66.3% at ~150 tokens). Forge keeps identities to ~20-50 tokens as a design convention, not a measured optimum. Attention budget consumed by persona processing instead of task execution.
+- **Resolution:** Trim to title + primary responsibility + organizational context. Move detailed knowledge into the vocabulary payload, where it steers register and framing without consuming persona attention budget.
 
 ### Missing Deliverables
 - **Detection:** Role definition describes only behaviors and attitudes, no concrete artifacts. Nothing that could be verified as "produced" or "not produced."
@@ -48,13 +48,23 @@ Creates structured agent definitions following the 7-component format. Every age
 
 ### Overlapping Authority
 - **Detection:** Two agents in a team can both autonomously decide the same thing. Decision authority sections have intersection.
-- **Why it fails:** Creates FM-2.3 Role Confusion from the MAST taxonomy. Agents produce contradictory outputs or duplicate work. Neither knows the other has already decided.
+- **Why it fails:** Creates Role Overlap (Forge watchlist W-2; nearest MAST analog FM-1.2 Disobey Role Specification). Agents produce contradictory outputs or duplicate work. Neither knows the other has already decided.
 - **Resolution:** Explicitly delineate — one agent decides, others advise. Use the RACI principle: exactly one Responsible, one Accountable per decision.
 
 ### Generic Vocabulary
 - **Detection:** Vocabulary payload contains consultant-speak — "best practices," "leverage," "synergy," "holistic approach," "robust solution," "paradigm shift."
-- **Why it fails:** Generic terms activate broad, shallow knowledge clusters. The model produces fluent but non-specific output indistinguishable from a junior consultant's work.
+- **Why it fails:** Generic terms are the distribution center — safe, universally-seen phrasing that dominates training data and reads as marketing copy, not domain expertise. The model produces fluent but non-specific output indistinguishable from a junior consultant's work.
 - **Resolution:** Apply the 15-year practitioner test to every term. Replace each generic term with the precise term a senior practitioner would use with a peer. "Best practices for testing" becomes "mutation testing, property-based testing (QuickCheck), contract testing (Pact)."
+
+### Reasoning-Echo Instruction
+- **Detection:** SOP or role identity instructs the agent to "show your reasoning," "think step by step and output your thoughts," "transcribe your internal reasoning," or similar.
+- **Why it fails:** On current models, instructing an agent to echo or transcribe internal reasoning can trigger the reasoning-extraction refusal classifier, producing a refusal instead of the requested output. Manual chain-of-thought scaffolding is also unnecessary — adaptive thinking supersedes it (Prompting Claude Fable 5, 2026).
+- **Resolution:** Ask for conclusions with brief stated rationale ("state your recommendation and the key factors behind it in 2-3 sentences") instead of requesting a reasoning transcript.
+
+### Over-Prescribed SOP
+- **Detection:** SOP enumerates exhaustive edge cases, micromanages every sub-step, or reads as a laundry list rather than goal/boundary/verification framing.
+- **Why it fails:** Over-prescription degrades output on current-generation models — brief goal, boundary, and verification framing outperforms exhaustive step enumeration (Prompting Claude Fable 5, 2026).
+- **Resolution:** State the goal, the decision-authority boundaries, and how success is verified. Keep step count in the 4-8 range, and prefer a fresh-context verifier subagent over self-critique steps folded into the same agent's SOP.
 
 ---
 
@@ -167,7 +177,7 @@ Rules:
 Name specific failure modes for this role with detection signals.
 
 Rules:
-- Use established pattern names from MAST taxonomy or domain literature where they exist.
+- Use names from the Forge watchlist (`./references/failure-modes.md`), real MAST modes, or domain literature where they exist.
 - Detection signals must be observable, not inferential.
 - Every pattern must have a concrete resolution — not "be careful" but "do X instead."
 - Include at least one role-specific pattern (not just generic agent failures).
@@ -186,15 +196,16 @@ Rules:
 
 OUTPUT: Complete 7-component agent definition.
 
-### Step 5: Apply PRISM Validation
+### Step 5: Apply Persona Validation
 
-Review the complete definition against PRISM findings:
+Review the complete definition against persona science and current-model guidance:
 
-1. **Token count check:** Is role identity under 50 tokens? If not, trim.
-2. **Flattery check:** Any superlatives or quality claims? If found, remove.
-3. **Role-task alignment:** Does the job title match the primary deliverables? If misaligned, adjust.
+1. **Token-count check (Forge convention):** Is role identity within ~20-50 tokens? If not, trim.
+2. **Flattery check (style convention):** Any superlatives or quality claims? If found, remove.
+3. **Role-task fit:** Does the job title match the primary deliverables? If misaligned, adjust.
 4. **Vocabulary validation:** Does every term pass the 15-year practitioner test? Replace any that fail.
 5. **Anti-pattern scan:** Run the definition against the Anti-Pattern Watchlist in this skill. Fix any matches.
+6. **Reasoning-echo check:** Does any SOP step instruct the agent to reveal, transcribe, or echo its internal reasoning or chain of thought? If found, replace with a request for conclusions plus brief stated rationale.
 
 OUTPUT: Validated agent definition.
 
@@ -255,7 +266,7 @@ See `./references/agent-template.md` for a fully annotated example.
 **BAD:**
 > You are the world's leading product manager with unparalleled expertise in creating products that users love. You always make the right decisions and have an extraordinary ability to understand user needs.
 
-Problems: 42 tokens of flattery. "World's leading" activates motivational text. "Always make the right decisions" is an absolute. "Extraordinary ability" is a quality claim. No organizational context. No collaboration boundaries.
+Problems: 42 tokens of flattery. "World's leading" is a quality claim with no scope information. "Always make the right decisions" is an absolute. "Extraordinary ability" is a quality claim. No organizational context. No collaboration boundaries.
 
 **GOOD:**
 > You are a product manager responsible for defining requirements and success metrics within a B2B SaaS product team. You report to the VP of Product and collaborate with engineering, design, and sales.
@@ -267,14 +278,14 @@ Why it works: Real job title. Primary responsibility stated. Organizational cont
 **BAD:**
 > best practices, stakeholder alignment, strategic vision, innovative solutions, leverage synergies, drive results, thought leadership, holistic approach
 
-Problems: Every term fails the 15-year practitioner test. No senior PM says "leverage synergies" to a peer. These activate generic business writing clusters. No framework attributions. No sub-domain clustering.
+Problems: Every term fails the 15-year practitioner test. No senior PM says "leverage synergies" to a peer. This is consultant-speak — the distribution center, not a route out of it. No framework attributions. No sub-domain clustering.
 
 **GOOD:**
 > **Discovery & Prioritization:** PRD structure, RICE prioritization (Intercom), Jobs-to-be-Done (Christensen), opportunity-solution tree (Teresa Torres), assumption mapping
 > **Execution Frameworks:** user story mapping (Jeff Patton), INVEST criteria (Bill Wake), acceptance criteria, definition of done, sprint goal
 > **Measurement:** OKR alignment, North Star metric, activation rate, retention cohort, product-market fit score (Sean Ellis)
 
-Why it works: Three distinct clusters. Every term passes the 15-year practitioner test. Framework originators attributed. No consultant-speak. 25 precise terms that route to product management knowledge clusters.
+Why it works: Three distinct clusters. Every term passes the 15-year practitioner test. Framework originators attributed. No consultant-speak. 25 precise terms that steer output toward product-management register and framing.
 
 ---
 
@@ -298,6 +309,6 @@ Why it works: Three distinct clusters. Every term passes the 15-year practitione
 ## References
 
 - `./schemas/agent-definition.md` — The 7-component format specification
-- `./references/persona-science.md` — PRISM findings on persona effectiveness
+- `./references/persona-science.md` — Evidence base and design conventions for role identity (alignment-accuracy tradeoff, length, role-task fit)
 - `./references/agent-template.md` — Annotated gold-standard agent example
-- `./references/failure-modes.md` — MAST failure modes relevant to agent design
+- `./references/failure-modes.md` — MAST failure shares + Forge watchlist items the Agent Creator can prevent

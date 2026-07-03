@@ -9,11 +9,11 @@ Science-backed AI team assembly. From goal to agents to artifacts.
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-Forge is an open-source system that uses research from DeepMind, PRISM persona science, and context engineering to assemble AI agent teams. It takes a goal, determines whether you need one agent or a team, selects the right coordination topology, and produces structured agent definitions with expert vocabulary, clear deliverables, and anti-pattern guardrails. Works with Claude Code.
+Forge is an open-source system that uses controlled multi-agent scaling research (Kim et al., Google Research/MIT), persona science, and context engineering to assemble AI agent teams. It takes a goal, determines whether you need one agent or a team, selects the right coordination topology, and produces structured agent definitions with expert vocabulary, clear deliverables, and anti-pattern guardrails. Works with Claude Code.
 
 ## The Core Insight
 
-The single highest-leverage intervention in AI agent quality is **vocabulary routing** — using precise domain terminology that activates expert knowledge clusters in the model's embedding space. Real-world job titles and role structures activate relevant training data better than custom personas. And DeepMind's scaling research shows that more agents isn't always better — teams of 3-5 with structured artifact handoffs outperform larger groups.
+The single highest-leverage intervention for generative **quality** is **vocabulary routing** — precise domain terminology that steers output toward expert register, bounded by a mid-range specificity optimum (too generic and too jargon-heavy both underperform). Real-world job titles and role structures define scope, register, and decision boundaries for each agent — they don't grant capability the model doesn't already have. The strongest-evidenced finding in Forge's research base is the opposite of "more agents is better": a Google Research/MIT-led scaling study (Kim et al.) found that once single-agent performance already exceeds ~45% accuracy on a task, adding agents produces *negative* returns. Forge's answer is the cascade — always try a single agent first — and teams of 3-4 (5 max) with structured artifact handoffs when a team is genuinely warranted.
 
 ## Quick Start: Claude Code
 
@@ -75,11 +75,11 @@ Forge uses a 3-level decision flow:
 
 **Level 2 — Novel Domain.** No template exists. Forge decomposes the goal into workstreams, proposes a team topology (pipeline, parallel, coordinator, or hierarchical), defines roles with precise vocabulary, and iterates with you until the blueprint is right.
 
-At every level, the same principles apply: real-world role titles, domain-specific vocabulary, structured artifacts between agents, and a hard cap of 3-5 agents per team.
+At every level, the same principles apply: real-world role titles, domain-specific vocabulary, structured artifacts between agents, and teams of 3-4 agents recommended (5 hard cap).
 
 ## Research Foundation
 
-Every design decision in Forge traces back to published research. The `docs/research/` directory contains synthesized findings from DeepMind's multi-agent scaling laws, PRISM persona science, and context engineering best practices.
+Every design decision in Forge traces back to published research. The `docs/research/` directory contains synthesized findings from a Google Research/MIT-led multi-agent scaling study (Kim et al., 2025), persona science on role/persona effects (including PRISM, Hu et al. 2026), the MAST multi-agent failure taxonomy (Cemri et al., 2025), and context engineering best practices. Evidence base verified July 2026; see [docs/research/source-index.md](docs/research/source-index.md) for the full bibliography.
 
 For the full methodology, see [METHODOLOGY.md](METHODOLOGY.md).
 

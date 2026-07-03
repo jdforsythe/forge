@@ -1,86 +1,118 @@
 # Multi-Agent Scaling Laws
 
-> Reference for Forge skill design. DeepMind's three principles for multi-agent scaling, the 45% threshold, topology selection, and cost multipliers.
+> Reference for Forge skill design. What the 2025-2026 evidence actually says about when agent teams help, when they hurt, team size, and topology. Findings are cited to their sources; Forge's own conventions are explicitly labeled as design standards, not research results.
 
 ---
 
-## DeepMind Three Principles (2025)
+## Primary Source
 
-### Principle 1: MAS Effectiveness Depends on Task Decomposability
+**Kim et al., "Towards a Science of Scaling Agent Systems" (arXiv:2512.08296, Dec 2025).** A Google Research / MIT-led controlled study (with Google DeepMind co-authors) evaluating five architectures (single-agent, independent, centralized, decentralized, hybrid) across three model families (GPT, Gemini, Claude) and four benchmarks (Finance-Agent, BrowseComp-Plus, PlanCraft, Workbench). Companion blog: [research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work](https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/).
 
-Tasks that can be cleanly divided into independent subtasks benefit from multiple agents. Tasks with high interdependency between steps do not.
-
-**Test:** Can you define the interfaces between subtasks as typed artifacts with clear schemas? If yes, the task is decomposable. If subtasks require continuous back-and-forth to make progress, the task is not decomposable — use a single agent.
-
-### Principle 2: Coordination Overhead Can Exceed Benefits
-
-Every additional agent adds communication overhead:
-- Messages must be composed, transmitted, received, parsed, and acted upon.
-- Each handoff risks information loss (MAST FM-1.x failures).
-- Agents must maintain shared understanding of progress and state.
-
-For tasks requiring tight coordination, this overhead can consume more tokens than the additional agent contributes in useful work.
-
-### Principle 3: Optimal Team Size is 3-5, Saturation at 4
-
-Performance scales sub-linearly with team size:
-- **3 agents:** Best efficiency-to-capability ratio for most tasks.
-- **4 agents:** Peak capability for complex decomposable tasks. Saturation point.
-- **5 agents:** Marginal gains, significant coordination cost.
-- **6+ agents:** Diminishing returns. Often net-negative.
-- **7+ agents:** Adding agents typically degrades overall performance.
+Note: this study predates the Claude 4.5/5 generation; its coefficients come from four benchmarks and may not generalize to open-ended software engineering. Treat its thresholds as strong priors, not laws.
 
 ---
 
-## The 45% Threshold
+## The Three Scaling Effects (Kim et al.)
 
-**Critical finding:** If a single well-prompted agent achieves >45% of the optimal performance on a task, adding more agents has diminishing returns.
+The paper identifies three dominant effects that determine whether adding agents helps:
 
-The coordination tax on additional agents often prevents them from contributing their proportional share. The single agent already covers the "easy half" of the problem; the remaining difficulty is in coordination-heavy integration work where more agents add more overhead.
+### 1. Tool-Coordination Trade-off
 
-**Implication:** Always try the single-agent approach first. Only escalate to multi-agent when the single agent demonstrably cannot handle the task — not when you assume it cannot.
+Agents that must both operate many tools and coordinate with teammates degrade: the coordination burden competes with tool-use capacity, and the trade-off worsens with tool density (16+ tools). High tool density favors a single agent.
 
-**Application in Forge:** The cascade pattern (Level 0 → Level 3) operationalizes this finding. Start with a single agent, measure results, escalate only on demonstrated failure.
+### 2. Capability Saturation
+
+Once a single-agent baseline already performs well on a task, additional agents yield diminishing or negative returns (see the 45% baseline paradox below). Coordination cannot add capability the base model already expresses.
+
+### 3. Topology-Dependent Error Amplification
+
+Errors propagate differently by topology. In the study, independent (uncoordinated) multi-agent teams amplified errors **17.2x** relative to a single agent; a centralized orchestrator contained amplification to **4.4x**. If a team is used at all, someone must own integration.
 
 ---
 
-## Scaling Cost Multipliers
+## The 45% Baseline Paradox
 
-| Team Size | Token Cost Multiplier | Effective Output Multiplier | Efficiency Ratio |
-|---|---|---|---|
-| 1 (single) | 1.0x | 1.0x | 1.00 |
-| 2 | 2.2x | 1.6x | 0.73 |
-| 3 | 3.5x | 2.3x | 0.66 |
-| 4 | 5.0x | 2.8x | 0.56 |
-| 5 | 7.0x | 3.1x | 0.44 |
-| 7+ | 12.0x+ | 3.0x or less | <0.25 |
+**Finding (Kim et al.):** Tasks where single-agent performance already exceeds **~45% accuracy** experience negative returns from additional agents (coordination coefficient β = −0.408, p < 0.001).
 
-**Reading the table:**
-- A 3-agent team costs 3.5x the tokens of a single agent but produces only 2.3x the effective output.
-- Efficiency ratio = Output Multiplier / Cost Multiplier. It drops consistently as team size grows.
-- At 5 agents, you pay 7x the cost for 3.1x the output — efficiency is 0.44.
-- At 7+ agents, you may get less output than a 4-agent team at much higher cost.
+The single agent already covers the accessible portion of the problem; the remaining difficulty lives in coordination-heavy integration work where more agents add more overhead, not more capability.
+
+**Precision note:** the threshold is *45% accuracy on the benchmark task*, not "45% of optimal performance." It is an empirical regression threshold observed across the study's benchmarks, not a universal constant.
+
+**Implication:** Always try the single-agent approach first. Escalate to multi-agent only when the single agent demonstrably fails — not when you assume it will.
+
+---
+
+## Task-Architecture Alignment
+
+The same study's headline result is that **task structure, not team size, determines whether multi-agent helps**:
+
+| Task type | Multi-agent effect (Kim et al.) |
+|---|---|
+| Parallelizable, decomposable (Finance-Agent) | **+57% to +81%** (centralized best: +80.9%) |
+| Breadth-first search (BrowseComp-Plus) | +0.2% to +9.2% (marginal) |
+| Mixed workflow (Workbench) | −11% to +6% |
+| Strictly sequential (PlanCraft) | **−39% to −70%** — every multi-agent variant degraded performance |
+
+Mean multi-agent change across all benchmarks: **−3.5%** — with enormous task-dependent variance. A predictive model over task properties (decomposability, tool count, etc.) selected the best architecture for **87%** of held-out configurations.
+
+**Test for decomposability:** Can you define the interfaces between subtasks as typed artifacts with clear schemas? If subtasks require continuous back-and-forth to make progress, the task is sequential — use a single agent.
+
+---
+
+## Coordination Overhead and Token Economics
+
+Real, sourced numbers to replace intuition:
+
+- **Coordination overhead by topology (Kim et al.):** independent +58%, decentralized +263%, centralized +285%, hybrid +515%.
+- **Turn count grows superlinearly with team size (Kim et al.):** T = 2.72·(n+0.5)^1.724 (R² = 0.974). A 4-agent hybrid took ~44 turns where a single agent took ~7. Under fixed budgets, per-agent reasoning capacity "becomes prohibitively thin beyond 3-4 agents."
+- **Efficiency coefficients (Kim et al.):** single-agent 0.466 vs multi-agent 0.074–0.234 — a **2-6x efficiency penalty** for teams.
+- **Anthropic's production data point:** their orchestrator-worker research system beat single-agent Claude Opus 4 by **90.2%** on an internal breadth-first research eval — while consuming **~15x the tokens** of a chat interaction, with token spend alone explaining ~80% of performance variance ([How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system), Jun 2025).
+
+The lesson from both: multi-agent is a way to *spend more compute productively on parallelizable work*, not a way to get more capability per token.
+
+---
+
+## The Compute Confound
+
+**Tran & Kiela (arXiv:2604.02460, 2026):** with thinking-token budgets held equal, single agents matched or beat five multi-agent architectures (sequential, debate, ensemble, parallel-roles, subtask-parallel) on multi-hop reasoning benchmarks. Many published multi-agent gains are compute and context-window effects, not architectural benefits.
+
+**Implication for Forge:** the burden of proof is on the team. A "team beat one agent" result only counts if the single agent was given comparable effort.
+
+---
+
+## Team Size: What the Evidence Supports
+
+No study supports a universal saturation point. What the literature shows:
+
+- **Kim et al.:** agent-count optima are model- and architecture-dependent (one model peaked at 7 agents); but fixed-budget turn growth constrains effective teams to **3-4 agents in practice**.
+- **Ringelmann-effect scaling law (Bertalanič & Fortuna, arXiv:2606.02646, 2026):** effectiveness follows R(N) = 1/(1 + c(N−1)N^−β) with three regimes (hard-ceiling, sublinear, linear). Homogeneous debating teams hit hard ceilings — 30 agents added no answer diversity over 1. Only heterogeneous teams escape ceilings. A pilot run with N ≤ 5 predicts the ceiling.
+- **MacNet (Qian et al., ICLR 2025, arXiv:2406.07155):** collaborative scaling follows logistic growth — gains saturate early.
+
+> **Forge design standard — team size cap.** Forge recommends **3-4 agents** and enforces a **hard cap of 5**. This is an engineering convention informed by the fixed-budget analysis above (Kim et al.'s "prohibitively thin beyond 3-4 agents") and the early-saturation results — not a measured universal optimum. Heterogeneous roles (different expertise, different artifacts) are required; homogeneous teams saturate fastest.
 
 ---
 
 ## Topology Selection Matrix
 
+> Forge design guidance, informed by the error-amplification and overhead findings above. The "max effective agents" column reflects the 3-4 recommendation / 5 cap, not a per-topology measurement.
+
 | Topology | Best For | Coordination Cost | Max Effective Agents | Example |
 |---|---|---|---|---|
-| Sequential pipeline | Dependent stages | Low | 5-6 | Requirements → Design → Build → Test |
+| Sequential pipeline | Dependent stages | Low | 4-5 | Requirements → Design → Build → Test |
 | Parallel-independent | Independent subtasks with synthesis | Medium | 4-5 | Multiple analyses merged by coordinator |
 | Centralized coordinator | Complex interdependencies | High | 4-5 | Coordinator dispatches and integrates |
-| Hierarchical | Large scope, delegation layers | Very high | 5-7 | Lead delegates to sub-teams |
+| Hierarchical | Large scope, delegation layers | Very high | 5 | Lead delegates to sub-teams |
 | Debate/adversarial | Verification, red-teaming | Medium | 2-3 | Proposer + Critic |
 
 ### Topology Decision Rules
 
-1. **Strong sequential dependencies** → Sequential pipeline. Each step depends on previous output.
-2. **Independent subtasks, shared goal** → Parallel-independent with synthesis agent.
-3. **Complex coordination, many dependencies** → Centralized coordinator manages flow.
-4. **Clear hierarchy, delegation pattern** → Hierarchical. Lead delegates, reviews, integrates.
-5. **Uncertain or exploratory tasks** → Start with single agent. Add complexity only when needed.
-6. **High tool density** (heavy file I/O, web search, code execution) → Single agent preferred. Coordination tax exceeds multi-agent benefit.
+1. **Strong sequential dependencies** → single agent first (sequential tasks degraded 39-70% under *every* multi-agent variant in Kim et al.). If a pipeline is still warranted for role separation, keep it short and gate each handoff.
+2. **Independent subtasks, shared goal** → parallel-independent with a synthesis agent. Never leave parallel agents unintegrated: independent teams showed 17.2x error amplification vs 4.4x with a centralized integrator.
+3. **Complex coordination, many dependencies** → centralized coordinator manages flow.
+4. **Clear hierarchy, delegation pattern** → hierarchical; budget for the highest overhead (+515% for hybrid structures).
+5. **Uncertain or exploratory tasks** → start with a single agent. Add structure only on demonstrated failure.
+6. **High tool density (16+ tools, heavy file I/O)** → single agent preferred; the tool-coordination trade-off worsens with tool count.
+7. **Writes stay single-threaded.** Parallel agents are for reads, research, and review; concurrent writers create conflicting implicit decisions (Cognition, "Don't Build Multi-Agents," 2025).
 
 ---
 
@@ -88,10 +120,10 @@ The coordination tax on additional agents often prevents them from contributing 
 
 All four conditions must be true:
 
-1. **Task is decomposable** into subtasks with clean typed interfaces.
-2. **Subtasks require genuinely different expertise** (not just different steps by the same role).
-3. **Single-agent trial showed clear capability gaps** (below 45% threshold or qualitative failure).
-4. **Project scope justifies 3-5x token cost** multiplier.
+1. **Task is decomposable** into subtasks with clean typed interfaces (the +81% regime, not the −70% regime).
+2. **Subtasks require genuinely different expertise** — heterogeneous roles; homogeneous teams hit diversity ceilings.
+3. **Single-agent trial showed clear capability gaps** — demonstrated failure at comparable effort (the compute confound), or a baseline below the ~45% accuracy regime.
+4. **Project scope justifies the cost** — expect a 2-6x efficiency penalty and, for research-style orchestration, up to ~15x token spend.
 
 If any condition is false, use a single agent with tool augmentation.
 
@@ -99,15 +131,17 @@ If any condition is false, use a single agent with tool augmentation.
 
 ## The Cascade Pattern (Operationalized)
 
+The best-supported idea in Forge: start minimal, escalate only on demonstrated failure. Consistent with Kim et al. (baseline paradox), Tran & Kiela (compute confound), and Anthropic's "Building Effective Agents" (find the simplest solution possible).
+
 | Level | Configuration | When to Use |
 |---|---|---|
 | 0 | Single well-prompted agent | Always try first |
 | 1 | Single agent + tools (search, code exec) | Agent needs external data |
-| 2 | Two agents (worker + reviewer) | Quality validation needed |
-| 3 | Small team (3-5 agents) | Task exceeds single-agent capability |
+| 2 | Two agents (worker + independent verifier) | Quality validation needed — fresh-context verifiers outperform self-critique (Anthropic, Prompting Claude Fable 5, 2026) |
+| 3 | Small team (3-4 agents, 5 max) | Task exceeds single-agent capability at comparable effort |
 | 4 | Multi-team with coordinator | Large scope with distinct workstreams |
 
-**Rule:** Never escalate to the next level until the current level demonstrably fails. This prevents unnecessary complexity and token waste.
+**Rule:** Never escalate to the next level until the current level demonstrably fails.
 
 ---
 
@@ -115,14 +149,18 @@ If any condition is false, use a single agent with tool augmentation.
 
 | Metric | Value | Source |
 |---|---|---|
-| Optimal team size | 3-5 agents | DeepMind 2025 |
-| Saturation point | 4 agents | DeepMind 2025 |
-| Single-agent sufficiency threshold | 45% of optimal | DeepMind 2025 |
-| Cost multiplier at 3 agents | 3.5x | DeepMind 2025 |
-| Cost multiplier at 5 agents | 7.0x | DeepMind 2025 |
-| Performance degradation threshold | 7+ agents | DeepMind 2025 |
-| Efficiency ratio at 4 agents | 0.56 | DeepMind 2025 |
+| Single-agent baseline threshold (negative returns above) | ~45% accuracy (β = −0.408, p < 0.001) | Kim et al. 2025, arXiv:2512.08296 |
+| Sequential-task degradation under multi-agent | −39% to −70% | Kim et al. 2025 |
+| Decomposable-task gains (centralized) | up to +80.9% | Kim et al. 2025 |
+| Mean multi-agent change across benchmarks | −3.5% | Kim et al. 2025 |
+| Error amplification: independent vs centralized | 17.2x vs 4.4x | Kim et al. 2025 |
+| Coordination overhead by topology | +58% to +515% | Kim et al. 2025 |
+| Turn growth with team size | T ∝ (n+0.5)^1.724 | Kim et al. 2025 |
+| Multi-agent efficiency penalty | 2-6x (0.466 vs 0.074-0.234) | Kim et al. 2025 |
+| Orchestrator-worker research gain / token cost | +90.2% / ~15x tokens | Anthropic multi-agent research system, 2025 |
+| Architecture predictable from task properties | 87% of held-out configs | Kim et al. 2025 |
+| Recommended team size / hard cap | 3-4 / 5 | **Forge design standard** (informed by the above) |
 
 ---
 
-*Source: Skill Design Research Synthesis §4.1-4.5, DeepMind multi-agent scaling research (2025)*
+*Sources: Kim et al. (2025), arXiv:2512.08296; Bertalanič & Fortuna (2026), arXiv:2606.02646; Tran & Kiela (2026), arXiv:2604.02460; Qian et al. (ICLR 2025), arXiv:2406.07155; Anthropic engineering blog (2025-2026); Cognition (2025). See docs/research/source-index.md for the full bibliography.*

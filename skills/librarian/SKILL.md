@@ -83,6 +83,7 @@ The curation and maintenance engine for the Forge library. Audits inventory, det
      c. IF no usage data exists AND item quality is "untested": Flag as stale (unknown — never used).
      d. IF last activity > 90 days (default threshold): Flag as stale.
      e. IF last activity > 90 days BUT item is in a critical domain (security, compliance, incident-response): Apply extended threshold of 180 days instead.
+     f. Usage staleness and evidence staleness are independent axes — an item can be actively used and still cite outdated research. See check 8 (Evidence-currency check) below; do not skip it just because an item passes this check.
    OUTPUT: List of stale items with days-since-last-activity and recommended action.
 
 5. **Quality promotion check.**
@@ -92,6 +93,7 @@ The curation and maintenance engine for the Forge library. Audits inventory, det
      c. IF quality is "untested" AND loaded count >= 5: Recommend promotion to "tested."
      d. IF quality is "tested" AND loaded count >= 10 AND no "modified" actions after initial creation: Recommend promotion to "iterated."
      e. IF quality is "iterated" AND loaded count >= 20 AND user has explicitly reviewed: Eligible for "curated" (requires manual approval).
+     f. Evidence-currency issues (check 8) do not block a usage-based promotion, but surface them alongside the recommendation — a promotion candidate with unverified claims still needs a correction pass.
    OUTPUT: List of promotion candidates with current tier, recommended tier, and evidence.
 
 6. **Orphan detection.**
@@ -107,9 +109,21 @@ The curation and maintenance engine for the Forge library. Audits inventory, det
      b. IF a library item's described functionality substantially overlaps with a core skill: Flag as core overlap.
    OUTPUT: List of items that may duplicate core skill functionality.
 
+8. **Evidence-currency check.**
+   Evidence baseline: July 2026, targeting Claude 4.5+/5. Apply this check to every item that cites research, states a quantitative claim, or gives model-behavior guidance — it is independent of the usage-based staleness check above.
+   FOR each such item:
+     a. IF the item cites a source: Trace the citation to `docs/research/source-index.md`. IF it cannot be traced: Flag as unverified citation.
+     b. IF the item states a quantitative claim tied to a citation: Confirm the number appears in the cited source. IF it does not: Flag as unsupported number.
+     c. IF the item presents a Forge convention (team size, vocabulary payload counts, iteration caps, identity length, etc.) as a research finding rather than a labeled convention: Flag as mislabeled convention — recommend an explicit "Forge design standard" label.
+     d. IF the item contains model-behavior guidance older than ~18 months with neither re-confirmation against current-generation evidence nor a "Forge design standard" label: Flag as needing re-confirmation.
+     e. Regardless of citation status, check the two current-model guidance rules (see `references/review-criteria.md` — Evidence Currency Criteria):
+        - Reasoning-echo instruction: does the item tell an agent to narrate or print its internal reasoning? Flag if so.
+        - Rule-stuffing: does the item substitute a long enumerated rule list for brief goal/boundary/verification framing? Flag if so.
+   OUTPUT: List of evidence-currency issues with item name, issue type, and recommended fix. These are findings, not blockers — see step 9.
+
 ### Phase 3: Produce Report
 
-8. **Compile review report.**
+9. **Compile review report.**
    Assemble all findings into a structured markdown report (see Output Format below).
    Include:
    - Summary statistics
@@ -118,17 +132,18 @@ The curation and maintenance engine for the Forge library. Audits inventory, det
    - Quality promotion recommendations (with usage evidence)
    - Orphaned references (with fix options)
    - Core overlap warnings
+   - Evidence-currency issues (with issue type and recommended fix)
    IF no issues found: Produce a clean report with summary statistics only.
 
-9. **Present report and WAIT for user approval.**
-   Do NOT modify any files until the user explicitly approves.
-   IF user approves all recommendations: Proceed to Phase 4.
-   IF user approves selectively: Execute only the approved changes.
-   IF user rejects: STOP. No changes made.
+10. **Present report and WAIT for user approval.**
+    Do NOT modify any files until the user explicitly approves.
+    IF user approves all recommendations: Proceed to Phase 4.
+    IF user approves selectively: Execute only the approved changes.
+    IF user rejects: STOP. No changes made.
 
 ### Phase 4: Execute Changes
 
-10. **Execute approved changes.**
+11. **Execute approved changes.**
     FOR each approved merge:
       a. Remove the lower-quality item from `index.json`.
       b. Optionally: copy unique tags from the removed item to the kept item.
@@ -140,15 +155,16 @@ The curation and maintenance engine for the Forge library. Audits inventory, det
       a. Update the item's `quality` field in `index.json`.
     FOR each approved orphan fix:
       a. Update the template's `roles` array in `index.json` as directed.
+    Evidence-currency fixes are content edits (correcting a claim, adding a label, rewriting a rule-stuffed instruction) made directly in the item's file — they do not have an `index.json` field of their own.
     Update `index.json` `updated` timestamp.
 
-11. **Log all changes.**
+12. **Log all changes.**
     FOR each change executed:
       Append a usage-log.jsonl entry with:
       - `ts`: current ISO 8601 timestamp
       - `item`: path of the affected item
       - `type`: item type (agent, skill, template)
-      - `action`: "archived" for removals, "promoted" for promotions, "modified" for merges and orphan fixes
+      - `action`: "archived" for removals, "promoted" for promotions, "modified" for merges, orphan fixes, and evidence-currency corrections
       - `context`: "librarian"
 
 ---
@@ -207,10 +223,17 @@ The review report uses structured markdown:
 - **Missing agent:** [agent-name]
 - **Options:** Create agent / Remove from template / Replace with [alternative]
 
+## Evidence Currency Issues
+
+### [Item Name]
+- **Issue type:** [Unverified citation / Unsupported number / Mislabeled convention / Needs re-confirmation / Reasoning-echo instruction / Rule-stuffing]
+- **Detail:** [what was found and where]
+- **Recommended fix:** [trace or remove citation / correct the number / add "Forge design standard" label / re-confirm against current-generation evidence / remove the reasoning-echo instruction / replace with goal-boundary-verification framing]
+
 ## No Issues
 
 [Only shown if all checks pass]
-Library is clean. No merge candidates, stale items, promotions, or orphans detected.
+Library is clean. No merge candidates, stale items, promotions, orphans, or evidence-currency issues detected.
 ```
 
 ---
@@ -287,6 +310,18 @@ Library is clean. No merge candidates, stale items, promotions, or orphans detec
 ### Template: marketing-campaign
 - **Missing agent:** brand-strategist
 - **Options:** Create brand-strategist agent / Remove from template / Replace with content-writer
+
+## Evidence Currency Issues
+
+### backend-engineer
+- **Issue type:** Unsupported number
+- **Detail:** Agent definition claims "pair review catches three times as many defects" with no citation. No source in docs/research/source-index.md states this figure.
+- **Recommended fix:** Remove the claim or replace with a sourced figure; if it describes a Forge convention, label it as such instead.
+
+### qa-engineer
+- **Issue type:** Reasoning-echo instruction
+- **Detail:** SOP step 4 instructs the agent to "explain your step-by-step reasoning before giving the verdict."
+- **Recommended fix:** Remove the reasoning-echo instruction; rely on adaptive thinking and require only the verdict plus supporting evidence.
 ```
 
 ### Example 2: Clean Library
@@ -319,9 +354,9 @@ Library is clean. No merge candidates, stale items, promotions, or orphans detec
 
 ## No Issues
 
-Library is clean. No merge candidates, stale items, promotions, or orphans detected.
+Library is clean. No merge candidates, stale items, promotions, orphans, or evidence-currency issues detected.
 
-All items have been used within the last 90 days. Quality tiers are up to date. All template references resolve to existing agents.
+All items have been used within the last 90 days. Quality tiers are up to date. All template references resolve to existing agents. All citations trace to docs/research/source-index.md and no item shows reasoning-echo instructions or rule-stuffing.
 ```
 
 ---
@@ -358,6 +393,7 @@ This skill activates when the user asks any of the following (or variations):
 - "Promote tested agents"
 - "What quality tier are my agents?"
 - "Is there anything stale in the library?"
+- "Is anything in the library citing outdated research?"
 
 ---
 
@@ -366,3 +402,4 @@ This skill activates when the user asks any of the following (or variations):
 - `./references/review-criteria.md` — Scoring rubrics, threshold definitions, and merge strategy details
 - `./schemas/index-schema.json` — Library index format specification
 - `./schemas/usage-log-schema.json` — Usage log entry format specification
+- `docs/research/source-index.md` — Bibliography used by the evidence-currency check to verify citations and quantitative claims
